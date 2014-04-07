@@ -1,0 +1,61 @@
+From 85d68d555013d0d67a7cf9f12017ee40f5bdeecf Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Oliver=20St=C3=A4bler?= <oliver.staebler@bytesatwork.ch>
+Date: Tue, 8 Oct 2013 10:46:17 +0200
+Subject: [PATCH] bytePANEL: Fix address of u-boot environment
+
+u-boot environment is at 0x260000 and its size is only one block.
+Additionally, the offset to each partition has been added as a comment.
+---
+ arch/arm/mach-omap2/board-am335x-bytepanel.c |   16 ++++++++--------
+ 1 file changed, 8 insertions(+), 8 deletions(-)
+
+diff --git a/arch/arm/mach-omap2/board-am335x-bytepanel.c b/arch/arm/mach-omap2/board-am335x-bytepanel.c
+index 05e1284..e919081 100644
+--- a/arch/arm/mach-omap2/board-am335x-bytepanel.c
++++ b/arch/arm/mach-omap2/board-am335x-bytepanel.c
+@@ -1224,34 +1224,34 @@ static struct mtd_partition am335x_nand_partitions[] = {
+ /* All the partition sizes are listed in terms of NAND block size */
+ 	{
+ 		.name           = "xloader-nand",
+-		.offset         = 0,
++		.offset         = 0,			/* Offset = 0x0 */
+ 		.size           = 4*(SZ_128K),
+ 		.mask_flags     = MTD_WRITEABLE
+ 	},
+ 	{
+ 		.name           = "uboot-nand",
+-		.offset         = MTDPART_OFS_APPEND,
+-		.size           = 14*(SZ_128K),
++		.offset         = MTDPART_OFS_APPEND,	/* Offset = 0x80000 */
++		.size           = 15*(SZ_128K),
+ 		.mask_flags     = MTD_WRITEABLE
+ 	},
+ 	{
+ 		.name           = "params-nand",
+-		.offset         = MTDPART_OFS_APPEND,
+-		.size           = 2*(SZ_128K)
++		.offset         = MTDPART_OFS_APPEND,	/* Offset = 0x260000 */
++		.size           = 1*(SZ_128K)
+ 	},
+ 	{
+ 		.name           = "linux-nand",
+-		.offset         = MTDPART_OFS_APPEND,
++		.offset         = MTDPART_OFS_APPEND,	/* Offset = 0x280000 */
+ 		.size           = 40*(SZ_128K)
+ 	},
+ 	{
+ 		.name           = "jffs2-nand",
+-		.offset         = MTDPART_OFS_APPEND,
++		.offset         = MTDPART_OFS_APPEND,	/* Offset = 0x780000 */
+ 		.size           = 1040*(SZ_128K),	/*130MB*/
+ 	},
+ 	{
+ 		.name           = "usr-nand",
+-		.offset         = MTDPART_OFS_APPEND,
++		.offset         = MTDPART_OFS_APPEND,	/* Offset = 0x8980000 */
+ 		.size           = MTDPART_SIZ_FULL,
+ 	},
+ };
+-- 
+1.7.10.4
+

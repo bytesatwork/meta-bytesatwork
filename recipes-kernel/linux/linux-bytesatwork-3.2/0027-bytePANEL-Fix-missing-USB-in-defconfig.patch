@@ -1,0 +1,88 @@
+From 6f27bec4a4a6cb7e9c4378eb13db45610ffd8d5a Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Oliver=20St=C3=A4bler?= <oliver.staebler@bytesatwork.ch>
+Date: Tue, 18 Feb 2014 11:32:46 +0100
+Subject: [PATCH] bytePANEL: Fix missing USB in defconfig
+
+An error introduced earlier disabled USB support. Enable USB Gadget
+support to enable USB Controller.
+---
+ arch/arm/configs/am335x_bytepanel_defconfig |   56 ++++++++++++++++++++++++++-
+ 1 file changed, 55 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm/configs/am335x_bytepanel_defconfig b/arch/arm/configs/am335x_bytepanel_defconfig
+index f7b0c0f..5dc06e2 100644
+--- a/arch/arm/configs/am335x_bytepanel_defconfig
++++ b/arch/arm/configs/am335x_bytepanel_defconfig
+@@ -1969,6 +1969,31 @@ CONFIG_USB_OTG=y
+ # CONFIG_USB_SL811_HCD is not set
+ # CONFIG_USB_R8A66597_HCD is not set
+ # CONFIG_USB_HWA_HCD is not set
++CONFIG_USB_MUSB_HDRC=y
++
++#
++# Platform Glue Layer
++#
++# CONFIG_USB_MUSB_TUSB6010_GLUE is not set
++# CONFIG_USB_MUSB_OMAP2PLUS_GLUE is not set
++# CONFIG_USB_MUSB_AM35X_GLUE is not set
++CONFIG_USB_MUSB_TI81XX_GLUE=y
++# CONFIG_USB_MUSB_DAVINCI is not set
++# CONFIG_USB_MUSB_DA8XX is not set
++# CONFIG_USB_MUSB_TUSB6010 is not set
++# CONFIG_USB_MUSB_OMAP2PLUS is not set
++# CONFIG_USB_MUSB_AM35X is not set
++CONFIG_USB_MUSB_TI81XX=y
++# CONFIG_USB_MUSB_BLACKFIN is not set
++# CONFIG_USB_MUSB_UX500 is not set
++CONFIG_USB_TI_CPPI41_DMA_HW=y
++# CONFIG_MUSB_PIO_ONLY is not set
++# CONFIG_USB_INVENTRA_DMA is not set
++# CONFIG_USB_TI_CPPI_DMA is not set
++CONFIG_USB_TI_CPPI41_DMA=y
++# CONFIG_USB_TUSB_OMAP_DMA is not set
++# CONFIG_USB_UX500_DMA is not set
++# CONFIG_USB_RENESAS_USBHS is not set
+ 
+ #
+ # USB Device Class drivers
+@@ -2037,7 +2062,36 @@ CONFIG_USB_STORAGE=y
+ # CONFIG_USB_OTG_EH_TEST is not set
+ # CONFIG_USB_ISIGHTFW is not set
+ # CONFIG_USB_YUREX is not set
+-# CONFIG_USB_GADGET is not set
++CONFIG_USB_GADGET=y
++# CONFIG_USB_GADGET_DEBUG_FILES is not set
++# CONFIG_USB_GADGET_DEBUG_FS is not set
++CONFIG_USB_GADGET_VBUS_DRAW=2
++CONFIG_USB_GADGET_STORAGE_NUM_BUFFERS=2
++# CONFIG_USB_FUSB300 is not set
++# CONFIG_USB_OMAP is not set
++# CONFIG_USB_R8A66597 is not set
++CONFIG_USB_GADGET_MUSB_HDRC=y
++# CONFIG_USB_M66592 is not set
++# CONFIG_USB_NET2272 is not set
++# CONFIG_USB_DUMMY_HCD is not set
++CONFIG_USB_GADGET_DUALSPEED=y
++# CONFIG_USB_ZERO is not set
++# CONFIG_USB_AUDIO is not set
++# CONFIG_USB_ETH is not set
++# CONFIG_USB_G_NCM is not set
++# CONFIG_USB_GADGETFS is not set
++# CONFIG_USB_FUNCTIONFS is not set
++# CONFIG_USB_FILE_STORAGE is not set
++# CONFIG_USB_MASS_STORAGE is not set
++# CONFIG_USB_G_SERIAL is not set
++# CONFIG_USB_MIDI_GADGET is not set
++# CONFIG_USB_G_PRINTER is not set
++# CONFIG_USB_CDC_COMPOSITE is not set
++# CONFIG_USB_G_ACM_MS is not set
++# CONFIG_USB_G_MULTI is not set
++# CONFIG_USB_G_HID is not set
++# CONFIG_USB_G_DBGP is not set
++# CONFIG_USB_G_WEBCAM is not set
+ 
+ #
+ # OTG and related infrastructure
+-- 
+1.7.10.4
+

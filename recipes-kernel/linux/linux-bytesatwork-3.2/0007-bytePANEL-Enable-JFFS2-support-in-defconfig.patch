@@ -1,0 +1,49 @@
+From bbc6172c65003f8538dadc2a48cb609e62632d30 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Oliver=20St=C3=A4bler?= <oliver.staebler@bytesatwork.ch>
+Date: Tue, 2 Jul 2013 10:49:31 +0200
+Subject: [PATCH] bytePANEL: Enable JFFS2 support in defconfig
+
+---
+ arch/arm/configs/am335x_bytepanel_defconfig |   25 +++++++++++++++++--------
+ 1 file changed, 17 insertions(+), 8 deletions(-)
+
+diff --git a/arch/arm/configs/am335x_bytepanel_defconfig b/arch/arm/configs/am335x_bytepanel_defconfig
+index 9dd376a..73450bb 100644
+--- a/arch/arm/configs/am335x_bytepanel_defconfig
++++ b/arch/arm/configs/am335x_bytepanel_defconfig
+@@ -2335,15 +2335,24 @@ CONFIG_MISC_FILESYSTEMS=y
+ # CONFIG_BEFS_FS is not set
+ # CONFIG_BFS_FS is not set
+ # CONFIG_EFS_FS is not set
+-# CONFIG_JFFS2_FS is not set
+-CONFIG_UBIFS_FS=y
+-# CONFIG_UBIFS_FS_XATTR is not set
+-# CONFIG_UBIFS_FS_ADVANCED_COMPR is not set
+-CONFIG_UBIFS_FS_LZO=y
+-CONFIG_UBIFS_FS_ZLIB=y
+-# CONFIG_UBIFS_FS_DEBUG is not set
++CONFIG_JFFS2_FS=y
++CONFIG_JFFS2_FS_DEBUG=0
++CONFIG_JFFS2_FS_WRITEBUFFER=y
++# CONFIG_JFFS2_FS_WBUF_VERIFY is not set
++CONFIG_JFFS2_SUMMARY=y
++# CONFIG_JFFS2_FS_XATTR is not set
++CONFIG_JFFS2_COMPRESSION_OPTIONS=y
++CONFIG_JFFS2_ZLIB=y
++CONFIG_JFFS2_LZO=y
++CONFIG_JFFS2_RTIME=y
++CONFIG_JFFS2_RUBIN=y
++# CONFIG_JFFS2_CMODE_NONE is not set
++CONFIG_JFFS2_CMODE_PRIORITY=y
++# CONFIG_JFFS2_CMODE_SIZE is not set
++# CONFIG_JFFS2_CMODE_FAVOURLZO is not set
++# CONFIG_UBIFS_FS is not set
+ # CONFIG_LOGFS is not set
+-CONFIG_CRAMFS=y
++# CONFIG_CRAMFS is not set
+ # CONFIG_SQUASHFS is not set
+ # CONFIG_VXFS_FS is not set
+ # CONFIG_MINIX_FS is not set
+-- 
+1.7.10.4
+

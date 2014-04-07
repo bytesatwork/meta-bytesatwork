@@ -1,0 +1,51 @@
+From 0b2e55a6c0116a6901df5d495c140cb800afb1ba Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Oliver=20St=C3=A4bler?= <oliver.staebler@bytesatwork.ch>
+Date: Mon, 9 Sep 2013 14:54:48 +0200
+Subject: [PATCH] M2: Call opp_update to handle OPP50 Bootup
+
+See commit 042c58a03f88430f98bf4989ad9beca19252abf8 for more information
+---
+ arch/arm/mach-omap2/board-am335x-bytepanel.c |   10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/mach-omap2/board-am335x-bytepanel.c b/arch/arm/mach-omap2/board-am335x-bytepanel.c
+index da23228..3820f03 100644
+--- a/arch/arm/mach-omap2/board-am335x-bytepanel.c
++++ b/arch/arm/mach-omap2/board-am335x-bytepanel.c
+@@ -2453,6 +2453,11 @@ static void setup_bytepanel(void)
+ #endif
+ }
+ 
++static void am335x_bytepanel_eeprom_setup(struct memory_accessor *mem_acc, void *context)
++{
++	am335x_opp_update();
++}
++
+ static void am335x_setup_daughter_board(struct memory_accessor *m, void *c)
+ {
+ 	int ret;
+@@ -2572,11 +2577,11 @@ static struct at24_platform_data am335x_daughter_board_eeprom_info = {
+ 	.context        = (void *)NULL,
+ };
+ 
+-static struct at24_platform_data am335x_baseboard_eeprom_info = {
++static struct at24_platform_data am335x_bytepanel_eeprom_info = {
+ 	.byte_len       = (256*1024) / 8,
+ 	.page_size      = 64,
+ 	.flags          = AT24_FLAG_ADDR16,
+-	.setup          = am335x_evm_setup,
++	.setup          = am335x_bytepanel_eeprom_setup,
+ 	.context        = (void *)NULL,
+ };
+ 
+@@ -2644,6 +2649,7 @@ static struct tps65910_board am335x_tps65910_info = {
+ static struct i2c_board_info __initdata am335x_i2c0_boardinfo[] = {
+                {
+                 I2C_BOARD_INFO("24c256", 0x50),
++		.platform_data  = &am335x_bytepanel_eeprom_info,
+                },
+                {
+ 		I2C_BOARD_INFO("tps65910", TPS65910_I2C_ID1),
+-- 
+1.7.10.4
+

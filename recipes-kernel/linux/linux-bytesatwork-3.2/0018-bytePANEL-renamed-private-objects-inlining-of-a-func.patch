@@ -1,0 +1,191 @@
+From ea06ad82bed894dceb2e9c7aad569154dc0b77e5 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Urs=20F=C3=A4ssler?= <urs@bytesatwork.ch>
+Date: Tue, 22 Oct 2013 11:41:54 +0200
+Subject: [PATCH] bytePANEL: renamed private objects, inlining of a function
+ and static variable
+
+---
+ arch/arm/mach-omap2/board-am335x-bytepanel.c |   85 ++++++++++++--------------
+ 1 file changed, 38 insertions(+), 47 deletions(-)
+
+diff --git a/arch/arm/mach-omap2/board-am335x-bytepanel.c b/arch/arm/mach-omap2/board-am335x-bytepanel.c
+index 6afa2f3..3a051cf 100644
+--- a/arch/arm/mach-omap2/board-am335x-bytepanel.c
++++ b/arch/arm/mach-omap2/board-am335x-bytepanel.c
+@@ -61,7 +61,6 @@
+ #include <plat/mmc.h>
+ #include <plat/emif.h>
+ #include <plat/nand.h>
+-#include <linux/lis3lv02d.h>
+ 
+ #include "board-flash.h"
+ #include "cpuidle33xx.h"
+@@ -184,7 +183,7 @@ struct pinmux_config {
+ 	int val; /* Options for the mux register value */
+ };
+ 
+-static struct omap_board_config_kernel am335x_evm_config[] __initdata = {
++static struct omap_board_config_kernel bytepanel_config[] __initdata = {
+ };
+ 
+ /*
+@@ -535,7 +534,7 @@ static struct pinmux_config ads7846_pin_mux[] = {
+ 	{"gpmc_a6.gpio1_22", OMAP_MUX_MODE7 | AM33XX_PIN_INPUT_PULLUP},
+ 	{NULL, 0},
+ };
+-static void am335x_bytepanel_ads7846_init(void)
++static void am335x_ads7846_init(void)
+ {
+ 	int r;
+ 	setup_pin_mux(ads7846_pin_mux);
+@@ -612,7 +611,7 @@ static struct gpmc_timings am335x_nand_timings = {
+ 	.wr_data_mux_bus = 0,
+ };
+ 
+-static void evm_nand_init(void)
++static void nand_init(void)
+ {
+ 	struct omap_nand_platform_data *pdata;
+ 	struct gpmc_devices_info gpmc_device[2] = {
+@@ -845,33 +844,6 @@ static void am335x_opp_update(void)
+ 	}
+ }
+ 
+-/* bytepanel */
+-static void setup_bytepanel(void)
+-{
+-	pr_info("The board is a AM335x bytePANEL.\n");
+-
+-	/* bytePANEL has Micro-SD slot which doesn't have Write Protect pin */
+-	am335x_mmc[0].gpio_wp = -EINVAL;
+-
+-	am335x_bytepanel_ads7846_init();
+-
+-	am335x_rtc_init();
+-	clkout2_enable();
+-	mii1_init();
+-	usb0_init();
+-	usb1_init();
+-	mmc0_init();
+-	lcdc_init();
+-	spi0_init();
+-	evm_nand_init();
+-
+-	am33xx_cpsw_init(AM33XX_CPSW_MODE_MII, NULL, NULL);
+-
+-#if defined(CONFIG_TOUCHSCREEN_EDT_FT5X06) || defined(CONFIG_TOUCHSCREEN_EDT_FT5X06_MODULE)
+-	am335x_bytepanel_ft5x06_init();
+-#endif
+-}
+-
+ static void am335x_bytepanel_eeprom_setup(struct memory_accessor *mem_acc, void *context)
+ {
+ 	am335x_opp_update();
+@@ -972,7 +944,7 @@ static struct omap_musb_board_data musb_board_data = {
+ };
+ 
+ 
+-static void __init am335x_evm_i2c_init(void)
++static void __init am335x_i2c_init(void)
+ {
+ 	omap_register_i2c_bus(1, 100, am335x_i2c0_boardinfo,
+ 				ARRAY_SIZE(am335x_i2c0_boardinfo));
+@@ -982,9 +954,9 @@ static void __init am335x_evm_i2c_init(void)
+ 
+ }
+ 
+-void __iomem *am33xx_emif_base;
++static void __iomem *am33xx_emif_base;
+ 
+-void __iomem * __init am33xx_get_mem_ctlr(void)
++static void __iomem * __init am33xx_get_mem_ctlr(void)
+ {
+ 
+ 	am33xx_emif_base = ioremap(AM33XX_EMIF0_BASE, SZ_32K);
+@@ -1000,13 +972,9 @@ void __iomem *am33xx_get_ram_base(void)
+ 	return am33xx_emif_base;
+ }
+ 
+-void __iomem *am33xx_gpio0_base;
+-
+ void __iomem *am33xx_get_gpio0_base(void)
+ {
+-	am33xx_gpio0_base = ioremap(AM33XX_GPIO0_BASE, SZ_4K);
+-
+-	return am33xx_gpio0_base;
++	return ioremap(AM33XX_GPIO0_BASE, SZ_4K);
+ }
+ 
+ static struct resource am33xx_cpuidle_resources[] = {
+@@ -1044,26 +1012,49 @@ static void __init am33xx_cpuidle_init(void)
+ 
+ }
+ 
+-static void __init am335x_evm_init(void)
++static void __init am335x_bytepanel_init(void)
+ {
+ 	am33xx_cpuidle_init();
+ 	am33xx_mux_init(board_mux);
+ 	omap_serial_init();
+-	am335x_evm_i2c_init();
++	am335x_i2c_init();
+ 	omap_sdrc_init(NULL, NULL);
+ 	usb_musb_init(&musb_board_data);
+-	omap_board_config = am335x_evm_config;
+-	omap_board_config_size = ARRAY_SIZE(am335x_evm_config);
++	omap_board_config = bytepanel_config;
++	omap_board_config_size = ARRAY_SIZE(bytepanel_config);
+ 	/* Create an alias for icss clock */
+ 	if (clk_add_alias("pruss", NULL, "pruss_uart_gclk", NULL))
+ 		pr_warn("failed to create an alias: icss_uart_gclk --> pruss\n");
+ 	/* Create an alias for gfx/sgx clock */
+ 	if (clk_add_alias("sgx_ck", NULL, "gfx_fclk", NULL))
+ 		pr_warn("failed to create an alias: gfx_fclk --> sgx_ck\n");
+-	setup_bytepanel();
++
++
++	pr_info("The board is a AM335x bytePANEL.\n");
++
++	/* bytePANEL has Micro-SD slot which doesn't have Write Protect pin */
++	am335x_mmc[0].gpio_wp = -EINVAL;
++
++	am335x_ads7846_init();
++
++	am335x_rtc_init();
++	clkout2_enable();
++	mii1_init();
++	usb0_init();
++	usb1_init();
++	mmc0_init();
++	lcdc_init();
++	spi0_init();
++	nand_init();
++
++	am33xx_cpsw_init(AM33XX_CPSW_MODE_MII, NULL, NULL);
++
++#if defined(CONFIG_TOUCHSCREEN_EDT_FT5X06) || defined(CONFIG_TOUCHSCREEN_EDT_FT5X06_MODULE)
++	am335x_bytepanel_ft5x06_init();
++#endif
+ }
+ 
+-static void __init am335x_evm_map_io(void)
++static void __init am335x_map_io(void)
+ {
+ 	omap2_set_globals_am33xx();
+ 	omapam33xx_map_common_io();
+@@ -1071,10 +1062,10 @@ static void __init am335x_evm_map_io(void)
+ 
+ MACHINE_START(BATWM, "am335x-m2")
+ 	.atag_offset	= 0x100,
+-	.map_io		= am335x_evm_map_io,
++	.map_io		= am335x_map_io,
+ 	.init_early	= am33xx_init_early,
+ 	.init_irq	= ti81xx_init_irq,
+ 	.handle_irq     = omap3_intc_handle_irq,
+ 	.timer		= &omap3_am33xx_timer,
+-	.init_machine	= am335x_evm_init,
++	.init_machine	= am335x_bytepanel_init,
+ MACHINE_END
+-- 
+1.7.10.4
+
