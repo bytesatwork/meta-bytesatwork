@@ -10,7 +10,7 @@ DEFCONFIG = "am335x_bytepanel_defconfig"
 
 inherit kernel
 
-SRC_URI = "git://arago-project.org/git/projects/linux-am33x.git;protocol=git;tag=v3.2_AM335xPSP_04.06.00.11 \
+SRC_URI = "git://arago-project.org/git/projects/linux-am33x.git;protocol=git;branch=v3.2-staging;tag=v3.2_AM335xPSP_04.06.00.11 \
 	   file://0001-bytePANEL-initial-commit.patch \
 	   file://0002-bytePANEL-enable-NAND-and-EEPROM.patch \
 	   file://0003-bytePANEL-Add-driver-for-EDT-FT5406.patch \
