@@ -35,9 +35,6 @@ Besides the BSP, this layer also provides the distribution "poky-bytesatwork" an
 * devbase-image-bytesatwork
 This image contains several essential developer tools, such as editors (vim, nano) and debugger (gdb, valgrind).
 
-* devfull-image-bytesatwork
-This image is based on the devbase-image-bytesatwork and contains a lot more tools for developing. Furthermore, the most used libraries are included.
-
 
 Reporting bugs
 -------------------------
