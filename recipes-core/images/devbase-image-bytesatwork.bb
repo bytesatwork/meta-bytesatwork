@@ -24,5 +24,5 @@ IMAGE_FEATURES += "package-management"
 
 inherit core-image
 
+require development-motd.inc
 require password.inc
-
