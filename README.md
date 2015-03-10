@@ -24,7 +24,7 @@ BSP
 This meta layer provides the Board Support Package (U-Boot and Linux kernel) for "bytePANEL" by bytes at work AG.
 Simply set the variable MACHINE to "bytepanel" to use this BSP.
 
-Linux Kernel recipe: linux-bytesatwork
+Linux Kernel recipe: linux-ti-staging
 U-Boot recipe: u-boot-ti-staging
 
 
