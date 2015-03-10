@@ -12,11 +12,11 @@ This layer depends on:
 
 	URI: git://git.yoctoproject.org/meta-ti
 	layer: meta-ti
-	branch: daisy
+	tag: ti2014.10.01
 
 	URI: git://git.openembedded.org/meta-openembedded
-	layers: meta-oe, meta-networking
-	branch: daisy
+	layers: meta-oe, meta-networking, meta-python
+	branch: dizzy
 
 
 BSP
