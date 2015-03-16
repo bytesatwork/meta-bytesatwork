@@ -12,8 +12,6 @@ SRC_URI += " \
 
 deltask compileconfigs
 
-KERNEL_DEVICETREE = "bytepanel.dtb bytepanel-et070080dh6.dtb bytepanel-et10.dtb bytepanel-etm043080adh6.dtb"
-
 DEFCONFIG = "bytepanel_defconfig"
 
 kernel_do_compile_prepend() {
