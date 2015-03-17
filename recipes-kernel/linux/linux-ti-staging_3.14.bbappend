@@ -9,6 +9,8 @@ SRC_URI += " \
 	file://0001-device-tree-support-for-m2-and-bytepanel.patch \
 	"
 
+deltask compileconfigs
+
 KERNEL_DEVICETREE = "bytepanel.dtb bytepanel-et070080dh6.dtb bytepanel-et10.dtb bytepanel-etm043080adh6.dtb"
 
 DEFCONFIG = "bytepanel_defconfig"
