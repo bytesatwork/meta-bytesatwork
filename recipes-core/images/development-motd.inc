@@ -5,20 +5,15 @@
 #
 
 setDevelopmentMotd() {
-	echo "" \
-		> ${IMAGE_ROOTFS}/etc/motd
-	echo "##################################################" \
-		>> ${IMAGE_ROOTFS}/etc/motd
-	echo "# ATTENTION:                                     #" \
-		>> ${IMAGE_ROOTFS}/etc/motd
-	echo "# This image is for development purposes only.   #" \
-		>> ${IMAGE_ROOTFS}/etc/motd
-	echo "# Please do not use in a production environment. #" \
-		>> ${IMAGE_ROOTFS}/etc/motd
-	echo "##################################################" \
-		>> ${IMAGE_ROOTFS}/etc/motd
-	echo "" \
-		>> ${IMAGE_ROOTFS}/etc/motd
+	cat >${IMAGE_ROOTFS}/etc/motd <<EOF
+
+##################################################
+# ATTENTION:                                     #
+# This image is for development purposes only.   #
+# Please do not use in a production environment. #
+##################################################
+
+EOF
 }
 
 ROOTFS_POSTPROCESS_COMMAND += " \
