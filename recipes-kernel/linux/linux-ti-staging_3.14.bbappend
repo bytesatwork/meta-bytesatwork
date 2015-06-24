@@ -3,11 +3,14 @@
 
 COMPATIBLE_MACHINE += "|bytepanel"
 
+# lock kernel version to ti-linux-3.14.y (v3.14.43) + patches
+SRCREV = "e19ba3d996f22ad8cc7187b30c18347aba0d594d"
+
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 
 SRC_URI += " \
 	file://0001-device-tree-support-for-m2-and-bytepanel.patch \
-	"
+"
 
 deltask compileconfigs
 
