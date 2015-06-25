@@ -13,11 +13,11 @@ This layer depends on:
 
 	URI: git://git.yoctoproject.org/meta-ti
 	layer: meta-ti
-	tag: ti2014.10.01
+	branch: fido
 
 	URI: git://git.openembedded.org/meta-openembedded
 	layers: meta-oe, meta-networking, meta-python
-	branch: dizzy
+	branch: fido
 
 
 BSP
