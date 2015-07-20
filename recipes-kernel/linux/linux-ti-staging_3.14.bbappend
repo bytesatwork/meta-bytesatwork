@@ -10,6 +10,7 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 
 SRC_URI += " \
 	file://0001-device-tree-support-for-m2-and-bytepanel.patch \
+	file://0002-ARM-dts-bytepanel-Remove-unneeded-configuration.patch \
 "
 
 deltask compileconfigs
