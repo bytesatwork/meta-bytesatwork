@@ -18,21 +18,27 @@ RDEPENDS_${PN} = "\
 	dosfstools \
 	e2fsprogs \
 	e2fsprogs-mke2fs \
+	evtest \
 	file \
 	gdb \
+	gdbserver \
 	htop \
 	man \
 	man-pages \
 	mtd-utils \
+	mtd-utils-jffs2 \
+	mtd-utils-misc \
+	mtd-utils-ubifs \
 	nano \
 	openssh-scp \
 	openssh-sshd \
+	perf \
 	procps \
 	screen \
-	time \
 	strace \
 	tar \
 	tcpdump \
+	time \
 	tslib \
 	tslib-calibrate \
 	tslib-conf \
