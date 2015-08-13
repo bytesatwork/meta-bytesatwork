@@ -1,0 +1,124 @@
+From 7ca893792614102edb511584318d290d968b6146 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Oliver=20St=C3=A4bler?= <oliver.staebler@bytesatwork.ch>
+Date: Thu, 4 Jun 2015 18:33:23 +0200
+Subject: [PATCH 4/5] am335x_m2: Cleanup unused code
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Urs Fässler <urs.fassler@bytesatwork.ch>
+---
+ board/bytesatwork/am335x/board.c | 83 +---------------------------------------
+ 1 file changed, 2 insertions(+), 81 deletions(-)
+
+diff --git a/board/bytesatwork/am335x/board.c b/board/bytesatwork/am335x/board.c
+index ba5984b..c285199 100644
+--- a/board/bytesatwork/am335x/board.c
++++ b/board/bytesatwork/am335x/board.c
+@@ -62,60 +62,6 @@ static const struct emif_regs ddr2_emif_reg_data = {
+ 	.emif_ddr_phy_ctlr_1 = MT47H128M16RT25E_EMIF_READ_LATENCY,
+ };
+ 
+-static const struct ddr_data ddr3_data = {
+-	.datardsratio0 = MT41J128MJT125_RD_DQS,
+-	.datawdsratio0 = MT41J128MJT125_WR_DQS,
+-	.datafwsratio0 = MT41J128MJT125_PHY_FIFO_WE,
+-	.datawrsratio0 = MT41J128MJT125_PHY_WR_DATA,
+-};
+-
+-static const struct ddr_data ddr3_beagleblack_data = {
+-	.datardsratio0 = MT41K256M16HA125E_RD_DQS,
+-	.datawdsratio0 = MT41K256M16HA125E_WR_DQS,
+-	.datafwsratio0 = MT41K256M16HA125E_PHY_FIFO_WE,
+-	.datawrsratio0 = MT41K256M16HA125E_PHY_WR_DATA,
+-};
+-
+-static const struct ddr_data ddr3_evm_data = {
+-	.datardsratio0 = MT41J512M8RH125_RD_DQS,
+-	.datawdsratio0 = MT41J512M8RH125_WR_DQS,
+-	.datafwsratio0 = MT41J512M8RH125_PHY_FIFO_WE,
+-	.datawrsratio0 = MT41J512M8RH125_PHY_WR_DATA,
+-};
+-
+-static const struct cmd_control ddr3_cmd_ctrl_data = {
+-	.cmd0csratio = MT41J128MJT125_RATIO,
+-	.cmd0iclkout = MT41J128MJT125_INVERT_CLKOUT,
+-
+-	.cmd1csratio = MT41J128MJT125_RATIO,
+-	.cmd1iclkout = MT41J128MJT125_INVERT_CLKOUT,
+-
+-	.cmd2csratio = MT41J128MJT125_RATIO,
+-	.cmd2iclkout = MT41J128MJT125_INVERT_CLKOUT,
+-};
+-
+-static const struct cmd_control ddr3_beagleblack_cmd_ctrl_data = {
+-	.cmd0csratio = MT41K256M16HA125E_RATIO,
+-	.cmd0iclkout = MT41K256M16HA125E_INVERT_CLKOUT,
+-
+-	.cmd1csratio = MT41K256M16HA125E_RATIO,
+-	.cmd1iclkout = MT41K256M16HA125E_INVERT_CLKOUT,
+-
+-	.cmd2csratio = MT41K256M16HA125E_RATIO,
+-	.cmd2iclkout = MT41K256M16HA125E_INVERT_CLKOUT,
+-};
+-
+-static const struct cmd_control ddr3_evm_cmd_ctrl_data = {
+-	.cmd0csratio = MT41J512M8RH125_RATIO,
+-	.cmd0iclkout = MT41J512M8RH125_INVERT_CLKOUT,
+-
+-	.cmd1csratio = MT41J512M8RH125_RATIO,
+-	.cmd1iclkout = MT41J512M8RH125_INVERT_CLKOUT,
+-
+-	.cmd2csratio = MT41J512M8RH125_RATIO,
+-	.cmd2iclkout = MT41J512M8RH125_INVERT_CLKOUT,
+-};
+-
+ #ifdef CONFIG_SPL_OS_BOOT
+ int spl_start_uboot(void)
+ {
+@@ -207,30 +153,6 @@ void set_mux_conf_regs(void)
+ 	enable_board_pin_mux();
+ }
+ 
+-const struct ctrl_ioregs ioregs_evmsk = {
+-	.cm0ioctl		= MT41J128MJT125_IOCTRL_VALUE,
+-	.cm1ioctl		= MT41J128MJT125_IOCTRL_VALUE,
+-	.cm2ioctl		= MT41J128MJT125_IOCTRL_VALUE,
+-	.dt0ioctl		= MT41J128MJT125_IOCTRL_VALUE,
+-	.dt1ioctl		= MT41J128MJT125_IOCTRL_VALUE,
+-};
+-
+-const struct ctrl_ioregs ioregs_bonelt = {
+-	.cm0ioctl		= MT41K256M16HA125E_IOCTRL_VALUE,
+-	.cm1ioctl		= MT41K256M16HA125E_IOCTRL_VALUE,
+-	.cm2ioctl		= MT41K256M16HA125E_IOCTRL_VALUE,
+-	.dt0ioctl		= MT41K256M16HA125E_IOCTRL_VALUE,
+-	.dt1ioctl		= MT41K256M16HA125E_IOCTRL_VALUE,
+-};
+-
+-const struct ctrl_ioregs ioregs_evm15 = {
+-	.cm0ioctl		= MT41J512M8RH125_IOCTRL_VALUE,
+-	.cm1ioctl		= MT41J512M8RH125_IOCTRL_VALUE,
+-	.cm2ioctl		= MT41J512M8RH125_IOCTRL_VALUE,
+-	.dt0ioctl		= MT41J512M8RH125_IOCTRL_VALUE,
+-	.dt1ioctl		= MT41J512M8RH125_IOCTRL_VALUE,
+-};
+-
+ const struct ctrl_ioregs ioregs = {
+ 	.cm0ioctl		= MT47H128M16RT25E_IOCTRL_VALUE,
+ 	.cm1ioctl		= MT47H128M16RT25E_IOCTRL_VALUE,
+@@ -241,9 +163,8 @@ const struct ctrl_ioregs ioregs = {
+ 
+ void sdram_init(void)
+ {
+-
+-		config_ddr(266, &ioregs, &ddr2_data,
+-			   &ddr2_cmd_ctrl_data, &ddr2_emif_reg_data, 0);
++	config_ddr(266, &ioregs, &ddr2_data, &ddr2_cmd_ctrl_data,
++			&ddr2_emif_reg_data, 0);
+ }
+ #endif
+ 
+-- 
+2.1.4
+

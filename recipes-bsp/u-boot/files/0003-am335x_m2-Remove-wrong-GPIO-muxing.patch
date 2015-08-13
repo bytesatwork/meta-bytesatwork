@@ -1,0 +1,69 @@
+From 84838dda194ac7cbdb347f39cfcc55a570f86256 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Oliver=20St=C3=A4bler?= <oliver.staebler@bytesatwork.ch>
+Date: Thu, 4 Jun 2015 15:29:02 +0200
+Subject: [PATCH 3/5] am335x_m2: Remove wrong GPIO muxing
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Urs Fässler <urs.fassler@bytesatwork.ch>
+---
+ board/bytesatwork/am335x/board.c | 5 -----
+ board/bytesatwork/am335x/mux.c   | 6 ------
+ 2 files changed, 11 deletions(-)
+
+diff --git a/board/bytesatwork/am335x/board.c b/board/bytesatwork/am335x/board.c
+index 2dec934..ba5984b 100644
+--- a/board/bytesatwork/am335x/board.c
++++ b/board/bytesatwork/am335x/board.c
+@@ -19,13 +19,11 @@
+ #include <asm/arch/omap.h>
+ #include <asm/arch/ddr_defs.h>
+ #include <asm/arch/clock.h>
+-#include <asm/arch/gpio.h>
+ #include <asm/arch/mmc_host_def.h>
+ #include <asm/arch/sys_proto.h>
+ #include <asm/arch/mem.h>
+ #include <asm/io.h>
+ #include <asm/emif.h>
+-#include <asm/gpio.h>
+ #include <i2c.h>
+ #include <miiphy.h>
+ #include <cpsw.h>
+@@ -38,9 +36,6 @@
+ 
+ DECLARE_GLOBAL_DATA_PTR;
+ 
+-/* GPIO that controls power to DDR on EVM-SK */
+-#define GPIO_DDR_VTT_EN		7
+-
+ static struct ctrl_dev *cdev = (struct ctrl_dev *)CTRL_DEVICE_BASE;
+ 
+ #ifndef CONFIG_SKIP_LOWLEVEL_INIT
+diff --git a/board/bytesatwork/am335x/mux.c b/board/bytesatwork/am335x/mux.c
+index b9af1f6..3e272fd 100644
+--- a/board/bytesatwork/am335x/mux.c
++++ b/board/bytesatwork/am335x/mux.c
+@@ -79,11 +79,6 @@ static struct module_pin_mux i2c0_pin_mux[] = {
+ 	{-1},
+ };
+ 
+-static struct module_pin_mux gpio0_7_pin_mux[] = {
+-	{OFFSET(ecap0_in_pwm0_out), (MODE(7) | PULLUDEN)},	/* GPIO0_7 */
+-	{-1},
+-};
+-
+ static struct module_pin_mux mii1_pin_mux[] = {
+ 	{OFFSET(mii1_rxerr), MODE(0) | RXACTIVE},	/* MII1_RXERR */
+ 	{OFFSET(mii1_txen), MODE(0)},			/* MII1_TXEN */
+@@ -140,7 +135,6 @@ void enable_i2c0_pin_mux(void)
+ 
+ void enable_board_pin_mux(void)
+ {
+-	configure_module_pin_mux(gpio0_7_pin_mux);
+ 	configure_module_pin_mux(mii1_pin_mux);
+ 	configure_module_pin_mux(mmc0_pin_mux);
+ }
+-- 
+2.1.4
+
