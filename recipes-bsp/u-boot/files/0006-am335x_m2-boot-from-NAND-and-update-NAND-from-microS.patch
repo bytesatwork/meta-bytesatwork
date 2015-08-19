@@ -1,0 +1,134 @@
+From a03d2fc30828a482abe2676a99a771ae6a27e428 Mon Sep 17 00:00:00 2001
+From: Daniel Ammann <daniel.ammann@bytesatwork.ch>
+Date: Tue, 18 Aug 2015 16:20:54 +0200
+Subject: [PATCH] am335x_m2: boot from NAND and update NAND from microSD card
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Note: put updates into /batw-sw directory:
+      MLO, u-boot.img, uImage, devtree.dtb, rootfs.jffs2
+
+Signed-off-by: Urs Fässler <urs.fassler@bytesatwork.ch>
+---
+ include/configs/am335x_m2.h | 65 ++++++++++++++++++++++++++++++++++++++++++---
+ 1 file changed, 62 insertions(+), 3 deletions(-)
+
+diff --git a/include/configs/am335x_m2.h b/include/configs/am335x_m2.h
+index 1aac7f8..87c3f14 100644
+--- a/include/configs/am335x_m2.h
++++ b/include/configs/am335x_m2.h
+@@ -68,7 +68,8 @@
+ 	"loadaddr=0x82000000\0" \
+ 	"dtbaddr=0x83000000\0" \
+ 	"console=ttyO0,115200n8\0" \
+-	"nand_root=/dev/mtdblock2\0" \
++	"mtd_parts=" MTDPARTS_DEFAULT "\0" \
++	"nand_root=/dev/mtdblock8\0" \
+ 	"nand_root_fs_type=jffs2\0" \
+ 	"nand_spl_addr=   0x00000000\0" \
+ 	"nand_spl_size=   0x00080000\0" \
+@@ -80,15 +81,20 @@
+ 	"nand_dtb_size=   0x00080000\0" \
+ 	"nand_kernel_addr=0x00300000\0" \
+ 	"nand_kernel_size=0x00500000\0" \
+-	"nand_part_addr= 0x00800000\0" \
++	"nand_rootfs_addr=0x00800000\0" \
++	"nand_rootfs_size=0x0f800000\0" \
++	"nand_part_addr=  0x00800000\0" \
+ 	"mmc_root=/dev/mmcblk0p2\0" \
++	"updatepath=/batw-sw\0" \
+ 	"nand_args=setenv bootargs " \
+ 		"console=${console} " \
+ 		"vt.global_cursor_default=0 " \
+ 		"mtdoops.mtddev=omap2.nand " \
++		"${mtd_parts} " \
+ 		"root=${nand_root} " \
+ 		"rootfstype=${nand_root_fs_type} " \
+ 		"rootwait " \
++		"consoleblank=0 " \
+ 		"; " \
+ 	"\0" \
+ 	"nand_boot=echo Booting from nand ...; " \
+@@ -97,11 +103,44 @@
+ 		"nand read ${dtbaddr} ${nand_dtb_addr} ${nand_dtb_size}; " \
+ 		"bootm ${loadaddr} - ${dtbaddr}; " \
+ 	"\0" \
++	"nand_update=echo Updating nand from mmc...; " \
++		"if fatls mmc 0 ${updatepath}; then " \
++			"if fatload mmc 0 ${loadaddr} ${updatepath}/MLO; then " \
++				"echo Found new SPL, flash it.; "\
++				"nand erase ${nand_spl_addr} ${nand_spl_size}; " \
++				"nand write ${loadaddr} ${nand_spl_addr} ${filesize}; " \
++			"fi; " \
++			"if fatload mmc 0 ${loadaddr} ${updatepath}/u-boot.img; then " \
++				"echo Found new U-Boot, flash it.; "\
++				"nand erase ${nand_u-boot_addr} ${nand_u-boot_size}; " \
++				"nand write ${loadaddr} ${nand_u-boot_addr} ${filesize}; " \
++			"fi; " \
++			"if fatload mmc 0 ${loadaddr} ${updatepath}/devtree.dtb; then " \
++				"echo Found new device tree, flash it.; "\
++				"nand erase ${nand_dtb_addr} ${nand_dtb_size}; " \
++				"nand write ${loadaddr} ${nand_dtb_addr} ${filesize}; " \
++			"fi; " \
++			"if fatload mmc 0 ${loadaddr} ${updatepath}/uImage; then " \
++				"echo Found new uImage, flash it.; "\
++				"nand erase ${nand_kernel_addr} ${nand_kernel_size}; " \
++				"nand write ${loadaddr} ${nand_kernel_addr} ${filesize}; " \
++			"fi; " \
++			"if fatload mmc 0 ${loadaddr} ${updatepath}/rootfs.jffs2; then " \
++				"echo Found new rootfs, flash it.; "\
++				"nand erase ${nand_rootfs_addr} ${nand_rootfs_size}; " \
++				"nand write ${loadaddr} ${nand_rootfs_addr} ${filesize}; " \
++			"fi; " \
++			"echo Flashing done. Remove SD card before power cycling.; " \
++		"else " \
++			"echo Update path ${updatepath} not found.; " \
++		"fi; " \
++	"\0" \
+ 	"mmc_args=setenv bootargs " \
+ 		"console=${console} " \
+ 		"vt.global_cursor_default=0 " \
+ 		"root=${mmc_root} " \
+ 		"rootwait " \
++		"consoleblank=0 " \
+ 		"; " \
+ 	"\0" \
+ 	"mmc_boot=echo Booting from mmc ...; " \
+@@ -114,7 +153,13 @@
+ #endif
+ 
+ #define CONFIG_BOOTCOMMAND \
+-	"run nand_boot"
++	"if mmc rescan; then " \
++		"echo SD/MMC found on device ${mmc_dev};" \
++		"run nand_update; " \
++		"run mmc_boot; " \
++	"else " \
++		"run nand_boot; " \
++	"fi; "\
+ 
+ #define CONFIG_CMD_ECHO
+ 
+@@ -212,4 +257,18 @@
+ #define CONFIG_PHYLIB
+ #define CONFIG_PHY_ADDR			1
+ 
++/* NAND support */
++#define CONFIG_CMD_NAND
++#define CONFIG_CMD_MTDPARTS
++#define MTDIDS_DEFAULT			"nand0=omap2-nand.0"
++#define MTDPARTS_DEFAULT		"mtdparts=omap2-nand.0:128k(SPL)," \
++					"128k(SPL.backup1)," \
++					"128k(SPL.backup2)," \
++					"128k(SPL.backup3),1920k(u-boot)," \
++					"128k(u-boot-env),512k(devtree),5m(kernel),-(rootfs)"
++#define CONFIG_NAND_OMAP_GPMC
++#define GPMC_NAND_ECC_LP_x16_LAYOUT	1
++#define CONFIG_SYS_MAX_NAND_DEVICE	1		/* Max number of NAND
++							   devices */
++
+ #endif	/* ! __CONFIG_AM335X_M2_H */
+-- 
+2.1.4
+

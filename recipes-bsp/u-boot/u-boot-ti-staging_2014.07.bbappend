@@ -12,4 +12,5 @@ SRC_URI += " \
 	file://0003-am335x_m2-Remove-wrong-GPIO-muxing.patch \
 	file://0004-am335x_m2-Cleanup-unused-code.patch \
 	file://0005-m2config-add-method-to-read-m2-configuration-from-ee.patch \
+	file://0006-am335x_m2-boot-from-NAND-and-update-NAND-from-microS.patch \
 "
