@@ -46,7 +46,7 @@ KERNEL_INITRAMFS ?= ""
 BOOTDD_VOLUME_ID ?= "${MACHINE}"
 
 # Boot partition size [in KiB] (will be rounded up to IMAGE_ROOTFS_ALIGNMENT)
-BOOT_SPACE ?= "20480"
+BOOT_SPACE ?= "262144"
 
 # Set alignment to 4MB [in KiB]
 IMAGE_ROOTFS_ALIGNMENT = "4096"
@@ -80,11 +80,22 @@ IMAGEDATESTAMP = "${@time.strftime('%Y.%m.%d',time.gmtime())}"
 
 IMAGE_CMD_bytesatwork-sdimg () {
 
+	# Define rootfs partition size as (sdcard_size - bootfs_size - 100MB):
+	# - sdcard_size: SDCARD_SIZE_TARGET in KiB
+	# - bootfs_size: BOOT_SPACE in KiB
+	# - 100MB:       space needed to reflect the fact that actual SD cards
+	#                typically have a smaller capacity than advertised
+	SDCARD_SIZE_TARGET=2000000
+	ROOTFS_SIZE_TARGET=$(expr ${SDCARD_SIZE_TARGET} - ${BOOT_SPACE} - 100000)
+	ROOTFS_SIZE=`du -bks ${SDIMG_ROOTFS} | awk '{print $1}'`
+	if [ $ROOTFS_SIZE -lt $ROOTFS_SIZE_TARGET ]; then
+		ROOTFS_SIZE=$ROOTFS_SIZE_TARGET
+	fi
+
 	# Align partitions
 	BOOT_SPACE_ALIGNED=$(expr ${BOOT_SPACE} + ${IMAGE_ROOTFS_ALIGNMENT} - 1)
 	BOOT_SPACE_ALIGNED=$(expr ${BOOT_SPACE_ALIGNED} - ${BOOT_SPACE_ALIGNED} % ${IMAGE_ROOTFS_ALIGNMENT})
-	ROOTFS_SIZE=`du -bks ${SDIMG_ROOTFS} | awk '{print $1}'`
-        # Round up RootFS size to the alignment size as well
+	# Round up RootFS size to the alignment size as well
 	ROOTFS_SIZE_ALIGNED=$(expr ${ROOTFS_SIZE} + ${IMAGE_ROOTFS_ALIGNMENT} - 1)
 	ROOTFS_SIZE_ALIGNED=$(expr ${ROOTFS_SIZE_ALIGNED} - ${ROOTFS_SIZE_ALIGNED} % ${IMAGE_ROOTFS_ALIGNMENT})
 	SDIMG_SIZE=$(expr ${IMAGE_ROOTFS_ALIGNMENT} + ${BOOT_SPACE_ALIGNED} + ${ROOTFS_SIZE_ALIGNED})
@@ -145,6 +156,7 @@ EOF
 	then
 		xzcat ${SDIMG_ROOTFS} | dd of=${SDIMG} conv=notrunc seek=1 bs=$(expr 1024 \* ${BOOT_SPACE_ALIGNED} + ${IMAGE_ROOTFS_ALIGNMENT} \* 1024) && sync && sync
 	else
+		resize2fs ${SDIMG_ROOTFS} ${ROOTFS_SIZE_ALIGNED}K
 		dd if=${SDIMG_ROOTFS} of=${SDIMG} conv=notrunc seek=1 bs=$(expr 1024 \* ${BOOT_SPACE_ALIGNED} + ${IMAGE_ROOTFS_ALIGNMENT} \* 1024) && sync && sync
 	fi
 
