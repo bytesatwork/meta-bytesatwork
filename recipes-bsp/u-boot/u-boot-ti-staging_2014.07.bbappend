@@ -13,4 +13,7 @@ SRC_URI += " \
 	file://0004-am335x_m2-Cleanup-unused-code.patch \
 	file://0005-m2config-add-method-to-read-m2-configuration-from-ee.patch \
 	file://0006-am335x_m2-boot-from-NAND-and-update-NAND-from-microS.patch \
+	file://0007-ARM-add-gcc5-support.patch \
+	file://0008-am335x_m2-adjust-mtdparts-command-line-argument-to-l.patch \
+	file://0009-am335x_m2-pass-mtdparts-command-line-argument-to-the.patch \
 "

@@ -1,0 +1,30 @@
+From f4e5ab1a2e559bedebaa3408b9077aaae28fb80b Mon Sep 17 00:00:00 2001
+From: Daniel Ammann <daniel.ammann@bytesatwork.ch>
+Date: Thu, 3 Dec 2015 20:40:51 +0100
+Subject: [PATCH] am335x_m2: pass mtdparts command line argument to the kernel
+ also with mmc
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Oliver Stäbler <oliver.staebler@bytesatwork.ch>
+---
+ include/configs/am335x_m2.h | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/include/configs/am335x_m2.h b/include/configs/am335x_m2.h
+index be51f8c..0c3b8fc 100644
+--- a/include/configs/am335x_m2.h
++++ b/include/configs/am335x_m2.h
+@@ -138,6 +138,8 @@
+ 	"mmc_args=setenv bootargs " \
+ 		"console=${console} " \
+ 		"vt.global_cursor_default=0 " \
++		"mtdoops.mtddev=omap2.nand " \
++		"${mtd_parts} " \
+ 		"root=${mmc_root} " \
+ 		"rootwait " \
+ 		"consoleblank=0 " \
+-- 
+2.4.10
+

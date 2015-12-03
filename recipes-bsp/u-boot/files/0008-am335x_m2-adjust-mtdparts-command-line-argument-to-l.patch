@@ -1,0 +1,29 @@
+From 0b8bea15bb9bf8ccff024cb95b810d886deec3ca Mon Sep 17 00:00:00 2001
+From: Daniel Ammann <daniel.ammann@bytesatwork.ch>
+Date: Thu, 3 Dec 2015 20:09:14 +0100
+Subject: [PATCH] am335x_m2: adjust mtdparts command line argument to linux 4.1
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Oliver Stäbler <oliver.staebler@bytesatwork.ch>
+---
+ include/configs/am335x_m2.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/configs/am335x_m2.h b/include/configs/am335x_m2.h
+index 87c3f14..be51f8c 100644
+--- a/include/configs/am335x_m2.h
++++ b/include/configs/am335x_m2.h
+@@ -261,7 +261,7 @@
+ #define CONFIG_CMD_NAND
+ #define CONFIG_CMD_MTDPARTS
+ #define MTDIDS_DEFAULT			"nand0=omap2-nand.0"
+-#define MTDPARTS_DEFAULT		"mtdparts=omap2-nand.0:128k(SPL)," \
++#define MTDPARTS_DEFAULT		"mtdparts=8000000.nand:128k(SPL)," \
+ 					"128k(SPL.backup1)," \
+ 					"128k(SPL.backup2)," \
+ 					"128k(SPL.backup3),1920k(u-boot)," \
+-- 
+2.4.10
+
