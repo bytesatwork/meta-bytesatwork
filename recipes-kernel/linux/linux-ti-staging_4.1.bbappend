@@ -3,8 +3,8 @@
 
 COMPATIBLE_MACHINE += "|bytepanel"
 
-# lock kernel version to ti-linux-3.14.y (v3.14.43) + patches
-SRCREV = "e19ba3d996f22ad8cc7187b30c18347aba0d594d"
+# lock kernel version to ti-lsk-linux-4.1.y (v4.1.6) + patches
+SRCREV = "6d77561dd0c6b18bd5e9abf45dc215b84ebe338f"
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 
@@ -12,6 +12,7 @@ SRC_URI += " \
 	file://0001-device-tree-support-for-m2-and-bytepanel.patch \
 	file://0002-ARM-dts-bytepanel-Remove-unneeded-configuration.patch \
 	file://0003-bytepanel_defconfig-enable-CONFIG_LEGACY_PTYS.patch \
+	file://0004-linux-4.1-support-for-m2-and-bytepanel.patch \
 "
 
 deltask compileconfigs
