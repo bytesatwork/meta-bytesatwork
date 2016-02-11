@@ -36,6 +36,9 @@ IMAGE_TYPEDEP_bytesatwork-sdimg = "${SDIMG_ROOTFS_TYPE}"
 # Set kernel and boot loader
 IMAGE_BOOTLOADER ?= "u-boot-ti-staging"
 
+# Temporary boot partition image
+IMAGE_VFAT_NAME ?= "boot.bytesatwork.img"
+
 # Use the first device tree from kernel if not specified by user
 SDIMG_DEVICETREE ??= "${KERNEL_DEVICETREE}"
 
@@ -116,15 +119,18 @@ IMAGE_CMD_bytesatwork-sdimg () {
 
 	# Create a vfat image with boot files
 	BOOT_BLOCKS=$(LC_ALL=C parted -s ${SDIMG} unit b print | awk '/ 1 / { print substr($4, 1, length($4 -1)) / 512 /2 }')
-	mkfs.vfat -n "${BOOTDD_VOLUME_ID}" -S 512 -C ${WORKDIR}/boot.img $BOOT_BLOCKS
-	mcopy -i ${WORKDIR}/boot.img -s ${DEPLOY_DIR_IMAGE}/MLO ::MLO
+	if [ -e ${WORKDIR}/${IMAGE_VFAT_NAME} ]; then	# mkfs.vfat does not overwrite output file
+		rm -f ${WORKDIR}/${IMAGE_VFAT_NAME}
+	fi
+	mkfs.vfat -n "${BOOTDD_VOLUME_ID}" -S 512 -C ${WORKDIR}/${IMAGE_VFAT_NAME} $BOOT_BLOCKS
+	mcopy -i ${WORKDIR}/${IMAGE_VFAT_NAME} -s ${DEPLOY_DIR_IMAGE}/MLO ::MLO
 	case "${KERNEL_IMAGETYPE}" in
 	"uImage")
-	    mcopy -i ${WORKDIR}/boot.img -s ${DEPLOY_DIR_IMAGE}/u-boot.img ::u-boot.img
-	    mcopy -i ${WORKDIR}/boot.img -s ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}${KERNEL_INITRAMFS}-${MACHINE}.bin ::uImage
+	    mcopy -i ${WORKDIR}/${IMAGE_VFAT_NAME} -s ${DEPLOY_DIR_IMAGE}/u-boot.img ::u-boot.img
+	    mcopy -i ${WORKDIR}/${IMAGE_VFAT_NAME} -s ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}${KERNEL_INITRAMFS}-${MACHINE}.bin ::uImage
 	    ;;
 	*)
-	    mcopy -i ${WORKDIR}/boot.img -s ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}${KERNEL_INITRAMFS}-${MACHINE}.bin ::kernel.img
+	    mcopy -i ${WORKDIR}/${IMAGE_VFAT_NAME} -s ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}${KERNEL_INITRAMFS}-${MACHINE}.bin ::kernel.img
 	    ;;
 	esac
 
@@ -135,22 +141,22 @@ EOF
 # do not indent above line!
 
 	local devtree="${DEPLOY_DIR_IMAGE}/uImage-${dtfile}"
-	mcopy -i ${WORKDIR}/boot.img -s ${devtree} ::devtree.dtb
+	mcopy -i ${WORKDIR}/${IMAGE_VFAT_NAME} -s ${devtree} ::devtree.dtb
 
 	if [ -n ${FATPAYLOAD} ] ; then
 		echo "Copying payload into VFAT"
 		for entry in ${FATPAYLOAD} ; do
 				# add the || true to stop aborting on vfat issues like not supporting .~lock files
-				mcopy -i ${WORKDIR}/boot.img -s -v ${IMAGE_ROOTFS}$entry :: || true
+				mcopy -i ${WORKDIR}/${IMAGE_VFAT_NAME} -s -v ${IMAGE_ROOTFS}$entry :: || true
 		done
 	fi
 
 	# Add stamp file
 	echo "${IMAGE_NAME}-${IMAGEDATESTAMP}" > ${WORKDIR}/image-version-info
-	mcopy -i ${WORKDIR}/boot.img -v ${WORKDIR}//image-version-info ::
+	mcopy -i ${WORKDIR}/${IMAGE_VFAT_NAME} -v ${WORKDIR}/image-version-info ::
 
 	# Burn Partitions
-	dd if=${WORKDIR}/boot.img of=${SDIMG} conv=notrunc seek=1 bs=$(expr ${IMAGE_ROOTFS_ALIGNMENT} \* 1024) && sync && sync
+	dd if=${WORKDIR}/${IMAGE_VFAT_NAME} of=${SDIMG} conv=notrunc seek=1 bs=$(expr ${IMAGE_ROOTFS_ALIGNMENT} \* 1024) && sync && sync
 	# If SDIMG_ROOTFS_TYPE is a .xz file use xzcat
 	if echo "${SDIMG_ROOTFS_TYPE}" | egrep -q "*\.xz"
 	then
