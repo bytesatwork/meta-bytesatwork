@@ -13,6 +13,7 @@ RDEPENDS_${PN} = "\
 	binutils \
 	binutils-symlinks \
 	bzip2 \
+	canutils \
 	coreutils \
 	dosfstools \
 	e2fsprogs \
@@ -22,6 +23,8 @@ RDEPENDS_${PN} = "\
 	gdb \
 	gdbserver \
 	htop \
+	iproute2 \
+	libsocketcan \
 	man \
 	man-pages \
 	mtd-utils \
