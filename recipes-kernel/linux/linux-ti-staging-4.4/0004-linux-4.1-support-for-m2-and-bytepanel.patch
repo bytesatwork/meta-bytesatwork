@@ -1,7 +1,7 @@
-From 58de4185fe1689b833e4a3f1734977608edf486b Mon Sep 17 00:00:00 2001
+From 0235409ed7c9f31d8ade48abc16d6af81de4aa09 Mon Sep 17 00:00:00 2001
 From: Daniel Ammann <daniel.ammann@bytesatwork.ch>
 Date: Fri, 4 Dec 2015 16:13:21 +0100
-Subject: [PATCH] linux 4.1 support for m2 and bytepanel
+Subject: [PATCH 4/6] linux 4.1 support for m2 and bytepanel
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -2226,5 +2226,5 @@ index c456fb4..5539c3d 100644
 +CONFIG_ARCH_HAS_SG_CHAIN=y
  CONFIG_VIRTUALIZATION=y
 -- 
-2.4.10
+2.1.4
 

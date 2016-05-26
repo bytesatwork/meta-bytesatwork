@@ -1,7 +1,7 @@
-From 7f2d4051f071678e6bbde03cf04fc834e6fc2f15 Mon Sep 17 00:00:00 2001
+From 627c1d7d999853a021ab2a7c5c468f3826b9b92f Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Oliver=20St=C3=A4bler?= <oliver.staebler@bytesatwork.ch>
 Date: Thu, 4 Jun 2015 18:00:37 +0200
-Subject: [PATCH] ARM: dts: bytepanel: Remove unneeded configuration
+Subject: [PATCH 2/6] ARM: dts: bytepanel: Remove unneeded configuration
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit

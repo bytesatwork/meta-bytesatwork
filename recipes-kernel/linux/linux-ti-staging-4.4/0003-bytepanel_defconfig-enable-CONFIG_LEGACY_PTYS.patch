@@ -1,7 +1,7 @@
-From d9760e70b48082a946a3caa57fb4b48506b2ca89 Mon Sep 17 00:00:00 2001
+From 5d221b87be66c5785769c6a80c0912de91db849a Mon Sep 17 00:00:00 2001
 From: Daniel Ammann <daniel.ammann@bytesatwork.ch>
 Date: Thu, 6 Aug 2015 15:11:28 +0200
-Subject: [PATCH] bytepanel_defconfig: enable CONFIG_LEGACY_PTYS
+Subject: [PATCH 3/6] bytepanel_defconfig: enable CONFIG_LEGACY_PTYS
 
 Note: This is a workaround for a bootlogd issue.
 ---
