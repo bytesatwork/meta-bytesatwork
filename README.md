@@ -13,11 +13,11 @@ This layer depends on:
 
 	URI: git://git.yoctoproject.org/meta-ti
 	layer: meta-ti
-	tag: ti2015.01
+	branch: krogoth
 
 	URI: git://git.openembedded.org/meta-openembedded
 	layers: meta-oe, meta-networking, meta-python
-	branch: jethro
+	branch: krogoth
 
 
 BSP
