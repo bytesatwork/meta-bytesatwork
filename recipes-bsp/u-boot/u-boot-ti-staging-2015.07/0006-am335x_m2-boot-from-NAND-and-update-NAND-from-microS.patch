@@ -1,7 +1,8 @@
-From a03d2fc30828a482abe2676a99a771ae6a27e428 Mon Sep 17 00:00:00 2001
+From 8fb74292f468613dea747cb03bc66b07c8b1cd8b Mon Sep 17 00:00:00 2001
 From: Daniel Ammann <daniel.ammann@bytesatwork.ch>
 Date: Tue, 18 Aug 2015 16:20:54 +0200
-Subject: [PATCH] am335x_m2: boot from NAND and update NAND from microSD card
+Subject: [PATCH 6/9] am335x_m2: boot from NAND and update NAND from microSD
+ card
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit

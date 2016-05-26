@@ -1,0 +1,334 @@
+From f6e0240a25e20efd033b526640e781274365dba9 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Oliver=20St=C3=A4bler?= <oliver.staebler@bytesatwork.ch>
+Date: Thu, 12 May 2016 19:20:41 +0200
+Subject: [PATCH 9/9] am335x_m2: Adapt to ti-u-boot-2015.07 and cleanup
+
+Adapt existing files to ti-u-boot-2015.07 and create needed files based on
+am335x_evm.
+Additionally, cleanup all configs, as the base configs of am335x has changed.
+Several defines are already set/included and may lead to compilation warnings
+due to redefines.
+
+Signed-off-by: Daniel Ammann <daniel.ammann@bytesatwork.ch>
+---
+ arch/arm/Kconfig                     | 11 ++++++
+ board/bytesatwork/am335x/Kconfig     | 25 ++++++++++++
+ board/bytesatwork/am335x/MAINTAINERS |  6 +++
+ board/bytesatwork/am335x/board.c     | 23 ++---------
+ board/bytesatwork/am335x/ram.c       |  3 +-
+ configs/am335x_m2_defconfig          |  9 +++++
+ include/configs/am335x_m2.h          | 74 +++---------------------------------
+ 7 files changed, 62 insertions(+), 89 deletions(-)
+ create mode 100644 board/bytesatwork/am335x/Kconfig
+ create mode 100644 board/bytesatwork/am335x/MAINTAINERS
+ create mode 100644 configs/am335x_m2_defconfig
+
+diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
+index 3403bcf..8b6e163 100644
+--- a/arch/arm/Kconfig
++++ b/arch/arm/Kconfig
+@@ -392,6 +392,16 @@ config TARGET_AM335X_EVM
+ 	select DM_GPIO
+ 	select CREATE_BOARD_SYMLINK
+ 
++config TARGET_AM335X_M2
++	bool "Support am335x_m2"
++	select CPU_V7
++	select SUPPORT_SPL
++	select DM
++	select DM_SERIAL
++	select DM_GPIO
++	help
++	  Support for the m2 module by bytes at work.
++
+ config TARGET_BAV335X
+ 	bool "Support bav335x"
+ 	select CPU_V7
+@@ -969,6 +979,7 @@ source "board/sunxi/Kconfig"
+ source "board/syteco/zmx25/Kconfig"
+ source "board/tbs/tbs2910/Kconfig"
+ source "board/ti/am335x/Kconfig"
++source "board/bytesatwork/am335x/Kconfig"
+ source "board/ti/am43xx/Kconfig"
+ source "board/birdland/bav335x/Kconfig"
+ source "board/ti/ti814x/Kconfig"
+diff --git a/board/bytesatwork/am335x/Kconfig b/board/bytesatwork/am335x/Kconfig
+new file mode 100644
+index 0000000..c3ee639
+--- /dev/null
++++ b/board/bytesatwork/am335x/Kconfig
+@@ -0,0 +1,25 @@
++if TARGET_AM335X_M2
++
++config SYS_BOARD
++	default "am335x"
++
++config SYS_VENDOR
++	default "bytesatwork"
++
++config SYS_SOC
++	default "am33xx"
++
++config SYS_CONFIG_NAME
++	default "am335x_m2"
++
++config CONS_INDEX
++	int "UART used for console"
++	range 1 6
++	default 1
++	help
++	  The AM335x SoC has a total of 6 UARTs (UART0 to UART5 as referenced
++	  in documentation, etc) available to it.  Depending on your specific
++	  board you may want something other than UART0 as for example the IDK
++	  uses UART3 so enter 4 here.
++
++endif
+diff --git a/board/bytesatwork/am335x/MAINTAINERS b/board/bytesatwork/am335x/MAINTAINERS
+new file mode 100644
+index 0000000..ec5775c
+--- /dev/null
++++ b/board/bytesatwork/am335x/MAINTAINERS
+@@ -0,0 +1,6 @@
++AM335X BOARD
++M:	Markus Kappeler <markus.kappeler@bytesatwork.ch>
++S:	Maintained
++F:	board/bytesatwork/am335x/
++F:	include/configs/am335x_m2.h
++F:	configs/am335x_m2_defconfig
+diff --git a/board/bytesatwork/am335x/board.c b/board/bytesatwork/am335x/board.c
+index 853b481..96b4750 100644
+--- a/board/bytesatwork/am335x/board.c
++++ b/board/bytesatwork/am335x/board.c
+@@ -93,24 +93,7 @@ void am33xx_spl_board_init(void)
+ 
+ void set_uart_mux_conf(void)
+ {
+-#ifdef CONFIG_SERIAL1
+ 	enable_uart0_pin_mux();
+-#endif /* CONFIG_SERIAL1 */
+-#ifdef CONFIG_SERIAL2
+-	enable_uart1_pin_mux();
+-#endif /* CONFIG_SERIAL2 */
+-#ifdef CONFIG_SERIAL3
+-	enable_uart2_pin_mux();
+-#endif /* CONFIG_SERIAL3 */
+-#ifdef CONFIG_SERIAL4
+-	enable_uart3_pin_mux();
+-#endif /* CONFIG_SERIAL4 */
+-#ifdef CONFIG_SERIAL5
+-	enable_uart4_pin_mux();
+-#endif /* CONFIG_SERIAL5 */
+-#ifdef CONFIG_SERIAL6
+-	enable_uart5_pin_mux();
+-#endif /* CONFIG_SERIAL6 */
+ }
+ 
+ void set_mux_conf_regs(void)
+@@ -224,7 +207,7 @@ int board_eth_init(bd_t *bis)
+ 	if (!getenv("ethaddr")) {
+ 		printf("<ethaddr> not set. Validating first E-fuse MAC\n");
+ 
+-		if (is_valid_ether_addr(mac_addr))
++		if (is_valid_ethaddr(mac_addr))
+ 			eth_setenv_enetaddr("ethaddr", mac_addr);
+ 	}
+ 
+@@ -240,7 +223,7 @@ int board_eth_init(bd_t *bis)
+ 	mac_addr[5] = (mac_lo & 0xFF00) >> 8;
+ 
+ 	if (!getenv("eth1addr")) {
+-		if (is_valid_ether_addr(mac_addr))
++		if (is_valid_ethaddr(mac_addr))
+ 			eth_setenv_enetaddr("eth1addr", mac_addr);
+ 	}
+ 
+@@ -272,7 +255,7 @@ int board_eth_init(bd_t *bis)
+ #endif
+ #if defined(CONFIG_USB_ETHER) && \
+ 	(!defined(CONFIG_SPL_BUILD) || defined(CONFIG_SPL_USBETH_SUPPORT))
+-	if (is_valid_ether_addr(mac_addr))
++	if (is_valid_ethaddr(mac_addr))
+ 		eth_setenv_enetaddr("usbnet_devaddr", mac_addr);
+ 
+ 	rv = usb_eth_initialize(bis);
+diff --git a/board/bytesatwork/am335x/ram.c b/board/bytesatwork/am335x/ram.c
+index 15414fc..687ae08 100644
+--- a/board/bytesatwork/am335x/ram.c
++++ b/board/bytesatwork/am335x/ram.c
+@@ -165,7 +165,8 @@ static const struct ram_config *getRam(void)
+ void sdram_init(void)
+ {
+ 	const struct ram_config *ram = getRam();
+-	printf("use ram configuration %u (%s)\n", ram->config, m2config_get_ram_name(ram->config));
++	/* TODO: Initialize UARTS earlier again so that we can print the configuration */
++	//printf("use ram configuration %u (%s)\n", ram->config, m2config_get_ram_name(ram->config));
+ 	ram->init();
+ }
+ 
+diff --git a/configs/am335x_m2_defconfig b/configs/am335x_m2_defconfig
+new file mode 100644
+index 0000000..c62cc17
+--- /dev/null
++++ b/configs/am335x_m2_defconfig
+@@ -0,0 +1,9 @@
++CONFIG_ARM=y
++CONFIG_TARGET_AM335X_M2=y
++CONFIG_SPL=y
++CONFIG_SPL_STACK_R=y
++CONFIG_SPL_STACK_R_ADDR=0x82000000
++CONFIG_SYS_EXTRA_OPTIONS="NAND"
++# CONFIG_CMD_IMLS is not set
++# CONFIG_CMD_FLASH is not set
++# CONFIG_CMD_SETEXPR is not set
+diff --git a/include/configs/am335x_m2.h b/include/configs/am335x_m2.h
+index 0c3b8fc..0960ad9 100644
+--- a/include/configs/am335x_m2.h
++++ b/include/configs/am335x_m2.h
+@@ -22,21 +22,14 @@
+ #include <configs/ti_am335x_common.h>
+ 
+ #ifndef CONFIG_SPL_BUILD
++#ifndef CONFIG_FIT
+ # define CONFIG_FIT
++#endif
+ # define CONFIG_TIMESTAMP
+ # define CONFIG_LZO
+-# ifdef CONFIG_ENABLE_VBOOT
+-#  define CONFIG_OF_CONTROL
+-#  define CONFIG_OF_SEPARATE
+-#  define CONFIG_DEFAULT_DEVICE_TREE am335x-m2
+-#  define CONFIG_FIT_SIGNATURE
+-#  define CONFIG_RSA
+-# endif
+ #endif
+ 
+ #define CONFIG_SYS_BOOTM_LEN		(16 << 20)
+-#define CONFIG_SYS_LONGHELP		/* undef to save memory */
+-#define CONFIG_SYS_HUSH_PARSER		/* use "hush" command parser */
+ 
+ #define MACH_TYPE_AM335XM2		3701
+ #define CONFIG_MACH_TYPE		MACH_TYPE_AM335XM2
+@@ -51,14 +44,9 @@
+ 
+ /* Always 128 KiB env size */
+ #define CONFIG_ENV_SIZE			(128 << 10)
+-#define CONFIG_SYS_CACHELINE_SIZE	64
+-
+-#define CONFIG_CMD_ASKENV
+-#define CONFIG_VERSION_VARIABLE
+ 
+-/* set to negative value for no autoboot */
+-#define CONFIG_ENV_VARS_UBOOT_CONFIG
+ #define CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG
++
+ #ifndef CONFIG_SPL_BUILD
+ #define CONFIG_EXTRA_ENV_SETTINGS \
+ 	"mlofile=MLO\0" \
+@@ -104,7 +92,7 @@
+ 		"bootm ${loadaddr} - ${dtbaddr}; " \
+ 	"\0" \
+ 	"nand_update=echo Updating nand from mmc...; " \
+-		"if fatls mmc 0 ${updatepath}; then " \
++		"if fatsize mmc 0 ${updatepath}; then " \
+ 			"if fatload mmc 0 ${loadaddr} ${updatepath}/MLO; then " \
+ 				"echo Found new SPL, flash it.; "\
+ 				"nand erase ${nand_spl_addr} ${nand_spl_size}; " \
+@@ -163,8 +151,6 @@
+ 		"run nand_boot; " \
+ 	"fi; "\
+ 
+-#define CONFIG_CMD_ECHO
+-
+ #define CONFIG_CMD_M2CONFIG
+ #define CONFIG_M2CONFIG_EEPROM
+ #ifndef CONFIG_SPL_BUILD
+@@ -174,61 +160,15 @@
+ #define CONFIG_M2CONFIG_BUILTIN_FLASH	M2_FLASH_2GBIT
+ #endif
+ 
+-/* We set the max number of command args high to avoid HUSH bugs. */
+-#define CONFIG_SYS_MAXARGS		64
+-
+-/* Console I/O Buffer Size */
+-#define CONFIG_SYS_CBSIZE		512
+-
+-/* Print Buffer Size */
+-#define CONFIG_SYS_PBSIZE		(CONFIG_SYS_CBSIZE \
+-					+ sizeof(CONFIG_SYS_PROMPT) + 16)
+-
+-/* Boot Argument Buffer Size */
+-#define CONFIG_SYS_BARGSIZE		CONFIG_SYS_CBSIZE
+-
+-#define CONFIG_SYS_I2C
+-#define CONFIG_SYS_OMAP24_I2C_SPEED	100000
+-#define CONFIG_SYS_I2C_OMAP24XX
+-#define CONFIG_SYS_OMAP24_I2C_SLAVE	1
+-#define CONFIG_SPL_I2C_SUPPORT
+-
+-#define CONFIG_MMC
+-#define CONFIG_GENERIC_MMC
+-#define CONFIG_OMAP_HSMMC
+-#define CONFIG_CMD_MMC
+-#define CONFIG_DOS_PARTITION
+-#define CONFIG_CMD_FAT
+-#define CONFIG_FAT_WRITE
+-#define CONFIG_CMD_EXT2
+-#define CONFIG_MTD_DEVICE
+-
+ /* NS16550 Configuration */
+-#define CONFIG_SYS_NS16550_COM1		0x44e09000	/* Base EVM has UART0 */
+-#define CONFIG_SYS_NS16550_COM2		0x48022000	/* UART1 */
+-#define CONFIG_SYS_NS16550_COM3		0x48024000	/* UART2 */
+-#define CONFIG_SYS_NS16550_COM4		0x481a6000	/* UART3 */
+-#define CONFIG_SYS_NS16550_COM5		0x481a8000	/* UART4 */
+-#define CONFIG_SYS_NS16550_COM6		0x481aa000	/* UART5 */
+-#define CONFIG_BAUDRATE			115200
+-
+-#define CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_SECTOR		0x300 /* address 0x60000 */
+-#define CONFIG_SYS_U_BOOT_MAX_SIZE_SECTORS		0x200 /* 256 KB */
+-#define CONFIG_SYS_MMC_SD_FAT_BOOT_PARTITION		1
+-#define CONFIG_SPL_FAT_LOAD_PAYLOAD_NAME		"u-boot.img"
+-#define CONFIG_SPL_MMC_SUPPORT
+-#define CONFIG_SPL_FAT_SUPPORT
++#define CONFIG_SYS_NS16550_COM1		0x44e09000
+ 
+ /* PMIC support */
+ #define CONFIG_POWER_TPS65910
+ 
+ /* SPL */
+-#ifndef CONFIG_NOR_BOOT
+ #define CONFIG_SPL_POWER_SUPPORT
+-#define CONFIG_SPL_YMODEM_SUPPORT
+-
+ #define CONFIG_SPL_LDSCRIPT		"$(CPUDIR)/am33xx/u-boot-spl.lds"
+-#endif
+ 
+ /* NAND: device related configs */
+ #define CONFIG_SYS_NAND_5_ADDR_CYCLE
+@@ -239,6 +179,7 @@
+ #define CONFIG_SYS_NAND_BLOCK_SIZE	(128*1024)
+ /* NAND: driver related configs */
+ #define CONFIG_NAND_OMAP_GPMC
++#define CONFIG_NAND_OMAP_GPMC_PREFETCH	/* 2015.07 */
+ #define CONFIG_NAND_OMAP_ELM
+ #define CONFIG_SYS_NAND_BAD_BLOCK_POS	NAND_LARGE_BADBLOCK_POS
+ #define CONFIG_SYS_NAND_ECCPOS		{1, 2, 3, 4, 5, 6, 7, 8, 9,\
+@@ -261,15 +202,12 @@
+ 
+ /* NAND support */
+ #define CONFIG_CMD_NAND
+-#define CONFIG_CMD_MTDPARTS
+ #define MTDIDS_DEFAULT			"nand0=omap2-nand.0"
+ #define MTDPARTS_DEFAULT		"mtdparts=8000000.nand:128k(SPL)," \
+ 					"128k(SPL.backup1)," \
+ 					"128k(SPL.backup2)," \
+ 					"128k(SPL.backup3),1920k(u-boot)," \
+ 					"128k(u-boot-env),512k(devtree),5m(kernel),-(rootfs)"
+-#define CONFIG_NAND_OMAP_GPMC
+-#define GPMC_NAND_ECC_LP_x16_LAYOUT	1
+ #define CONFIG_SYS_MAX_NAND_DEVICE	1		/* Max number of NAND
+ 							   devices */
+ 
+-- 
+2.1.4
+

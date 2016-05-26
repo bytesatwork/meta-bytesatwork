@@ -1,7 +1,7 @@
-From d2ee91de41b05d82c2c58c2bb522406605845c50 Mon Sep 17 00:00:00 2001
+From 9622b374a3c34f4a9a78ab9bc5ecdb114e7dd9b7 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Oliver=20St=C3=A4bler?= <oliver.staebler@bytesatwork.ch>
 Date: Wed, 4 Mar 2015 18:50:38 +0100
-Subject: [PATCH] am335x_m2: Initial commit
+Subject: [PATCH 1/9] am335x_m2: Initial commit
 
 Signed-off-by: Daniel Ammann <daniel.ammann@bytesatwork.ch>
 ---
@@ -10,9 +10,8 @@ Signed-off-by: Daniel Ammann <daniel.ammann@bytesatwork.ch>
  board/bytesatwork/am335x/board.h    |  57 +++++
  board/bytesatwork/am335x/mux.c      | 155 +++++++++++++
  board/bytesatwork/am335x/u-boot.lds | 131 +++++++++++
- boards.cfg                          |   1 +
  include/configs/am335x_m2.h         | 206 ++++++++++++++++++
- 7 files changed, 984 insertions(+)
+ 6 files changed, 983 insertions(+)
  create mode 100644 board/bytesatwork/am335x/Makefile
  create mode 100644 board/bytesatwork/am335x/board.c
  create mode 100644 board/bytesatwork/am335x/board.h
@@ -827,18 +826,6 @@ index 0000000..21faac0
 +	.gnu : { *(.gnu*) }
 +	.ARM.exidx : { *(.ARM.exidx*) }
 +}
-diff --git a/boards.cfg b/boards.cfg
-index f3e8ed2..3e862ff 100644
---- a/boards.cfg
-+++ b/boards.cfg
-@@ -280,6 +280,7 @@ Active  arm         armv7          am33xx      ti              am335x
- Active  arm         armv7          am33xx      ti              am335x              am335x_evm_uart4                      am335x_evm:SERIAL5,CONS_INDEX=5,NAND                                                                                              Tom Rini <trini@ti.com>
- Active  arm         armv7          am33xx      ti              am335x              am335x_evm_uart5                      am335x_evm:SERIAL6,CONS_INDEX=6,NAND                                                                                              Tom Rini <trini@ti.com>
- Active  arm         armv7          am33xx      ti              am335x              am335x_evm_usbspl                     am335x_evm:SERIAL1,CONS_INDEX=1,NAND,SPL_USBETH_SUPPORT                                                                           Tom Rini <trini@ti.com>
-+Active  arm         armv7          am33xx      bytesatwork     am335x              am335x_m2                             am335x_m2:SERIAL1,CONS_INDEX=1,NAND                                                                                               Markus Kappeler <markus.kappeler@bytesatwork.ch>
- Active  arm         armv7          am33xx      ti              am43xx              am43xx_evm                            am43xx_evm:SERIAL1,CONS_INDEX=1,NAND                                                                                              Lokesh Vutla <lokeshvutla@ti.com>
- Active  arm         armv7          am33xx      ti              am43xx              am43xx_evm_usbspl                     am43xx_evm:SERIAL1,CONS_INDEX=1,NAND,SPL_USBETH_SUPPORT                                                                           Lokesh Vutla <lokeshvutla@ti.com>
- Active  arm         armv7          am33xx      ti              am43xx              am43xx_evm_rtconly                    am43xx_evm:SERIAL1,CONS_INDEX=1,NAND,SPL_RTC_ONLY_SUPPORT
 diff --git a/include/configs/am335x_m2.h b/include/configs/am335x_m2.h
 new file mode 100644
 index 0000000..596e395

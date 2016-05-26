@@ -1,7 +1,8 @@
-From 0b8bea15bb9bf8ccff024cb95b810d886deec3ca Mon Sep 17 00:00:00 2001
+From ecb8438949b306c7d9a452389c48b997308a5c05 Mon Sep 17 00:00:00 2001
 From: Daniel Ammann <daniel.ammann@bytesatwork.ch>
 Date: Thu, 3 Dec 2015 20:09:14 +0100
-Subject: [PATCH] am335x_m2: adjust mtdparts command line argument to linux 4.1
+Subject: [PATCH 7/9] am335x_m2: adjust mtdparts command line argument to linux
+ 4.1
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -25,5 +26,5 @@ index 87c3f14..be51f8c 100644
  					"128k(SPL.backup2)," \
  					"128k(SPL.backup3),1920k(u-boot)," \
 -- 
-2.4.10
+2.1.4
 

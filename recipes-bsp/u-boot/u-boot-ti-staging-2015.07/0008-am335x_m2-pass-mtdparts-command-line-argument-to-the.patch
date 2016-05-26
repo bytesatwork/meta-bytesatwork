@@ -1,8 +1,8 @@
-From f4e5ab1a2e559bedebaa3408b9077aaae28fb80b Mon Sep 17 00:00:00 2001
+From 70c70b3d2ad6ed8062747d8a6a25f4f9db685250 Mon Sep 17 00:00:00 2001
 From: Daniel Ammann <daniel.ammann@bytesatwork.ch>
 Date: Thu, 3 Dec 2015 20:40:51 +0100
-Subject: [PATCH] am335x_m2: pass mtdparts command line argument to the kernel
- also with mmc
+Subject: [PATCH 8/9] am335x_m2: pass mtdparts command line argument to the
+ kernel also with mmc
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -26,5 +26,5 @@ index be51f8c..0c3b8fc 100644
  		"rootwait " \
  		"consoleblank=0 " \
 -- 
-2.4.10
+2.1.4
 

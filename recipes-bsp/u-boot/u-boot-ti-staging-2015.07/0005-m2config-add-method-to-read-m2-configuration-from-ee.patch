@@ -1,7 +1,7 @@
-From 0432356bc4686c81302f9b38ed678a2c13aaed3a Mon Sep 17 00:00:00 2001
+From e9046b723a0b5454b8563eeec25dc9058cd78670 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Urs=20F=C3=A4ssler?= <urs.fassler@bytesatwork.ch>
 Date: Thu, 25 Jun 2015 10:51:29 +0200
-Subject: [PATCH 5/5] m2config: add method to read m2 configuration from eeprom
+Subject: [PATCH 5/9] m2config: add method to read m2 configuration from eeprom
  and commands to manipulate
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
