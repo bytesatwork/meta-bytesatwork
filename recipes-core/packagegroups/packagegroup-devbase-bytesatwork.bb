@@ -13,7 +13,6 @@ RDEPENDS_${PN} = "\
 	binutils \
 	binutils-symlinks \
 	bzip2 \
-	cifs-utils \
 	coreutils \
 	dosfstools \
 	e2fsprogs \
