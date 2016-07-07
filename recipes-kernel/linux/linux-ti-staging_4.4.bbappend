@@ -10,6 +10,8 @@ SRC_URI += " \
 	file://0004-linux-4.1-support-for-m2-and-bytepanel.patch \
 	file://0005-linux-4.4-support-for-m2-and-bytepanel.patch \
 	file://0006-dts-remove-unsupported-displays-etm043080adh6-and-et.patch \
+	file://0007-devicetree-adding-muxing-and-enable-UART1.patch \
+	file://0008-defconfig-devicetree-adding-can-support.patch \
 "
 
 deltask compileconfigs
