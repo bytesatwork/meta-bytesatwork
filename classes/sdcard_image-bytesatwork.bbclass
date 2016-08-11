@@ -142,12 +142,17 @@ EOF
 
 	local devtree="${DEPLOY_DIR_IMAGE}/uImage-${dtfile}"
 	mcopy -i ${WORKDIR}/${IMAGE_VFAT_NAME} -s ${devtree} ::devtree.dtb
+	# also copy all the "original" device trees
+	for i in ${SDIMG_DEVICETREE}; do
+		local devtree="${DEPLOY_DIR_IMAGE}/uImage-${i}"
+		mcopy -i ${WORKDIR}/${IMAGE_VFAT_NAME} -s ${devtree} ::$i
+	done
 
 	if [ -n ${FATPAYLOAD} ] ; then
 		echo "Copying payload into VFAT"
 		for entry in ${FATPAYLOAD} ; do
-				# add the || true to stop aborting on vfat issues like not supporting .~lock files
-				mcopy -i ${WORKDIR}/${IMAGE_VFAT_NAME} -s -v ${IMAGE_ROOTFS}$entry :: || true
+			# add the || true to stop aborting on vfat issues like not supporting .~lock files
+			mcopy -i ${WORKDIR}/${IMAGE_VFAT_NAME} -s -v ${IMAGE_ROOTFS}$entry :: || true
 		done
 	fi
 
