@@ -13,4 +13,5 @@ SRC_URI += " \
 	file://0007-am335x_m2-adjust-mtdparts-command-line-argument-to-l.patch \
 	file://0008-am335x_m2-pass-mtdparts-command-line-argument-to-the.patch \
 	file://0009-am335x_m2-Adapt-to-ti-u-boot-2015.07-and-cleanup.patch \
+	file://0010-am335x_m2-boot-from-nand-if-mmc-has-no-kernel.patch \
 "
