@@ -1,0 +1,728 @@
+From 69cd0d3c56536101d7fbbd9beddcb8c119bba9d2 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Urs=20F=C3=A4ssler?= <urs.fassler@bytesatwork.ch>
+Date: Tue, 18 Aug 2015 14:56:56 +0200
+Subject: [PATCH 11/12] byteengine_m3: add initial byteENGINE AM437X support
+
+---
+ arch/arm/Kconfig                |   6 +
+ board/bytesatwork/m3/Kconfig    |  15 ++
+ board/bytesatwork/m3/Makefile   |  13 ++
+ board/bytesatwork/m3/board.c    | 349 ++++++++++++++++++++++++++++++++++++++++
+ board/bytesatwork/m3/board.h    |  26 +++
+ board/bytesatwork/m3/mux.c      |  71 ++++++++
+ configs/byteengine_m3_defconfig |  13 ++
+ include/configs/byteengine_m3.h | 149 +++++++++++++++++
+ 8 files changed, 642 insertions(+)
+ create mode 100644 board/bytesatwork/m3/Kconfig
+ create mode 100644 board/bytesatwork/m3/Makefile
+ create mode 100644 board/bytesatwork/m3/board.c
+ create mode 100644 board/bytesatwork/m3/board.h
+ create mode 100644 board/bytesatwork/m3/mux.c
+ create mode 100644 configs/byteengine_m3_defconfig
+ create mode 100644 include/configs/byteengine_m3.h
+
+diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
+index 8b6e163..12e3106 100644
+--- a/arch/arm/Kconfig
++++ b/arch/arm/Kconfig
+@@ -402,6 +402,11 @@ config TARGET_AM335X_M2
+ 	help
+ 	  Support for the m2 module by bytes at work.
+ 
++config TARGET_BYTEENGINE_M3
++	bool "Support byteengine_m3"
++	select CPU_V7
++	select SUPPORT_SPL
++
+ config TARGET_BAV335X
+ 	bool "Support bav335x"
+ 	select CPU_V7
+@@ -981,6 +986,7 @@ source "board/tbs/tbs2910/Kconfig"
+ source "board/ti/am335x/Kconfig"
+ source "board/bytesatwork/am335x/Kconfig"
+ source "board/ti/am43xx/Kconfig"
++source "board/bytesatwork/m3/Kconfig"
+ source "board/birdland/bav335x/Kconfig"
+ source "board/ti/ti814x/Kconfig"
+ source "board/ti/ti816x/Kconfig"
+diff --git a/board/bytesatwork/m3/Kconfig b/board/bytesatwork/m3/Kconfig
+new file mode 100644
+index 0000000..0a61001
+--- /dev/null
++++ b/board/bytesatwork/m3/Kconfig
+@@ -0,0 +1,15 @@
++if TARGET_BYTEENGINE_M3
++
++config SYS_BOARD
++	default "m3"
++
++config SYS_VENDOR
++	default "bytesatwork"
++
++config SYS_SOC
++	default "am33xx"
++
++config SYS_CONFIG_NAME
++	default "byteengine_m3"
++
++endif
+diff --git a/board/bytesatwork/m3/Makefile b/board/bytesatwork/m3/Makefile
+new file mode 100644
+index 0000000..36ecb30
+--- /dev/null
++++ b/board/bytesatwork/m3/Makefile
+@@ -0,0 +1,13 @@
++#
++# Makefile
++#
++# Copyright (C) 2013 Texas Instruments Incorporated - http://www.ti.com/
++#
++# SPDX-License-Identifier:	GPL-2.0+
++#
++
++ifeq ($(CONFIG_SKIP_LOWLEVEL_INIT),)
++obj-y	:= mux.o
++endif
++
++obj-y	+= board.o
+diff --git a/board/bytesatwork/m3/board.c b/board/bytesatwork/m3/board.c
+new file mode 100644
+index 0000000..bff0566
+--- /dev/null
++++ b/board/bytesatwork/m3/board.c
+@@ -0,0 +1,349 @@
++/*
++ * board.c
++ *
++ * Board functions for TI AM43XX based boards
++ *
++ * Copyright (C) 2013, Texas Instruments, Incorporated - http://www.ti.com/
++ *
++ * SPDX-License-Identifier:	GPL-2.0+
++ */
++
++#include <common.h>
++#include <i2c.h>
++#include <asm/errno.h>
++#include <spl.h>
++#include <usb.h>
++#include <asm/arch/clock.h>
++#include <asm/arch/sys_proto.h>
++#include <asm/arch/mux.h>
++#include <asm/arch/ddr_defs.h>
++#include <asm/arch/gpio.h>
++#include <asm/emif.h>
++#include "board.h"
++#include <power/pmic.h>
++#include <power/tps65218.h>
++#include <power/tps62362.h>
++#include <miiphy.h>
++#include <cpsw.h>
++#include <linux/usb/gadget.h>
++#include <dwc3-uboot.h>
++#include <dwc3-omap-uboot.h>
++#include <ti-usb-phy-uboot.h>
++
++DECLARE_GLOBAL_DATA_PTR;
++
++static struct ctrl_dev *cdev = (struct ctrl_dev *)CTRL_DEVICE_BASE;
++
++#ifndef CONFIG_SKIP_LOWLEVEL_INIT
++
++#define NUM_OPPS	6
++
++static const struct dpll_params dpll_mpu[NUM_CRYSTAL_FREQ][NUM_OPPS] = {
++	{	/* 19.2 MHz */
++		{125, 3, 2, -1, -1, -1, -1},	/* OPP 50 */
++		{-1, -1, -1, -1, -1, -1, -1},	/* OPP RESERVED	*/
++		{125, 3, 1, -1, -1, -1, -1},	/* OPP 100 */
++		{150, 3, 1, -1, -1, -1, -1},	/* OPP 120 */
++		{125, 2, 1, -1, -1, -1, -1},	/* OPP TB */
++		{625, 11, 1, -1, -1, -1, -1}	/* OPP NT */
++	},
++	{	/* 24 MHz */
++		{300, 23, 1, -1, -1, -1, -1},	/* OPP 50 */
++		{-1, -1, -1, -1, -1, -1, -1},	/* OPP RESERVED	*/
++		{600, 23, 1, -1, -1, -1, -1},	/* OPP 100 */
++		{720, 23, 1, -1, -1, -1, -1},	/* OPP 120 */
++		{800, 23, 1, -1, -1, -1, -1},	/* OPP TB */
++		{1000, 23, 1, -1, -1, -1, -1}	/* OPP NT */
++	},
++	{	/* 25 MHz */
++		{300, 24, 1, -1, -1, -1, -1},	/* OPP 50 */
++		{-1, -1, -1, -1, -1, -1, -1},	/* OPP RESERVED	*/
++		{600, 24, 1, -1, -1, -1, -1},	/* OPP 100 */
++		{720, 24, 1, -1, -1, -1, -1},	/* OPP 120 */
++		{800, 24, 1, -1, -1, -1, -1},	/* OPP TB */
++		{1000, 24, 1, -1, -1, -1, -1}	/* OPP NT */
++	},
++	{	/* 26 MHz */
++		{300, 25, 1, -1, -1, -1, -1},	/* OPP 50 */
++		{-1, -1, -1, -1, -1, -1, -1},	/* OPP RESERVED	*/
++		{600, 25, 1, -1, -1, -1, -1},	/* OPP 100 */
++		{720, 25, 1, -1, -1, -1, -1},	/* OPP 120 */
++		{800, 25, 1, -1, -1, -1, -1},	/* OPP TB */
++		{1000, 25, 1, -1, -1, -1, -1}	/* OPP NT */
++	},
++};
++
++static const struct dpll_params dpll_core[NUM_CRYSTAL_FREQ] = {
++		{625, 11, -1, -1, 10, 8, 4},	/* 19.2 MHz */
++		{1000, 23, -1, -1, 10, 8, 4},	/* 24 MHz */
++		{1000, 24, -1, -1, 10, 8, 4},	/* 25 MHz */
++		{1000, 25, -1, -1, 10, 8, 4}	/* 26 MHz */
++};
++
++static const struct dpll_params dpll_per[NUM_CRYSTAL_FREQ] = {
++		{400, 7, 5, -1, -1, -1, -1},	/* 19.2 MHz */
++		{400, 9, 5, -1, -1, -1, -1},	/* 24 MHz */
++		{384, 9, 5, -1, -1, -1, -1},	/* 25 MHz */
++		{480, 12, 5, -1, -1, -1, -1}	/* 26 MHz */
++};
++
++static const struct dpll_params gp_evm_dpll_ddr = {
++		50, 2, 1, -1, 2, -1, -1};
++
++static const struct ctrl_ioregs ioregs_ddr3 = {
++	.cm0ioctl		= DDR3_ADDRCTRL_IOCTRL_VALUE,
++	.cm1ioctl		= DDR3_ADDRCTRL_WD0_IOCTRL_VALUE,
++	.cm2ioctl		= DDR3_ADDRCTRL_WD1_IOCTRL_VALUE,
++	.dt0ioctl		= DDR3_DATA0_IOCTRL_VALUE,
++	.dt1ioctl		= DDR3_DATA0_IOCTRL_VALUE,
++	.dt2ioctrl		= DDR3_DATA0_IOCTRL_VALUE,
++	.dt3ioctrl		= DDR3_DATA0_IOCTRL_VALUE,
++	.emif_sdram_config_ext	= 0xc163,
++};
++
++
++static const struct emif_regs ddr3_sk_emif_regs_400Mhz = {
++	.sdram_config			= 0x638413b2,
++	.sdram_config2			= 0x00000000,
++	.ref_ctrl			= 0x00000c30,
++	.sdram_tim1			= 0xeaaad4db,
++	.sdram_tim2			= 0x266b7fda,
++	.sdram_tim3			= 0x107f8678,
++	.read_idle_ctrl			= 0x00050000,
++	.zq_config			= 0x50074be4,
++	.temp_alert_config		= 0x0,
++	.emif_ddr_phy_ctlr_1		= 0x0e084008,
++	.emif_ddr_ext_phy_ctrl_1	= 0x08020080,
++	.emif_ddr_ext_phy_ctrl_2	= 0x89,
++	.emif_ddr_ext_phy_ctrl_3	= 0x90,
++	.emif_ddr_ext_phy_ctrl_4	= 0x8e,
++	.emif_ddr_ext_phy_ctrl_5	= 0x8d,
++	.emif_rd_wr_lvl_rmp_win		= 0x0,
++	.emif_rd_wr_lvl_rmp_ctl		= 0x00000000,
++	.emif_rd_wr_lvl_ctl		= 0x00000000,
++	.emif_rd_wr_exec_thresh		= 0x80000000,
++	.emif_prio_class_serv_map	= 0x80000001,
++	.emif_connect_id_serv_1_map	= 0x80000094,
++	.emif_connect_id_serv_2_map	= 0x00000000,
++	.emif_cos_config		= 0x000FFFFF
++};
++
++void emif_get_ext_phy_ctrl_const_regs(const u32 **regs, u32 *size)
++{}
++
++/*
++ * get_sys_clk_index : returns the index of the sys_clk read from
++ *			ctrl status register. This value is either
++ *			read from efuse or sysboot pins.
++ */
++static u32 get_sys_clk_index(void)
++{
++	struct ctrl_stat *ctrl = (struct ctrl_stat *)CTRL_BASE;
++	u32 ind = readl(&ctrl->statusreg), src;
++
++	src = (ind & CTRL_CRYSTAL_FREQ_SRC_MASK) >> CTRL_CRYSTAL_FREQ_SRC_SHIFT;
++	if (src == CTRL_CRYSTAL_FREQ_SRC_EFUSE) /* Value read from EFUSE */
++		return ((ind & CTRL_CRYSTAL_FREQ_SELECTION_MASK) >>
++			CTRL_CRYSTAL_FREQ_SELECTION_SHIFT);
++	else /* Value read from SYS BOOT pins */
++		return ((ind & CTRL_SYSBOOT_15_14_MASK) >>
++			CTRL_SYSBOOT_15_14_SHIFT);
++}
++
++const struct dpll_params *get_dpll_ddr_params(void)
++{
++	return &gp_evm_dpll_ddr;
++}
++
++
++/*
++ * get_opp_offset:
++ * Returns the index for safest OPP of the device to boot.
++ * max_off:	Index of the MAX OPP in DEV ATTRIBUTE register.
++ * min_off:	Index of the MIN OPP in DEV ATTRIBUTE register.
++ * This data is read from dev_attribute register which is e-fused.
++ * A'1' in bit indicates OPP disabled and not available, a '0' indicates
++ * OPP available. Lowest OPP starts with min_off. So returning the
++ * bit with rightmost '0'.
++ */
++static int get_opp_offset(int max_off, int min_off)
++{
++	struct ctrl_stat *ctrl = (struct ctrl_stat *)CTRL_BASE;
++	int opp, offset, i;
++
++	/* Bits 0:11 are defined to be the MPU_MAX_FREQ */
++	opp = readl(&ctrl->dev_attr) & ~0xFFFFF000;
++
++	for (i = max_off; i >= min_off; i--) {
++		offset = opp & (1 << i);
++		if (!offset)
++			return i;
++	}
++
++	return min_off;
++}
++
++const struct dpll_params *get_dpll_mpu_params(void)
++{
++	int opp = get_opp_offset(DEV_ATTR_MAX_OFFSET, DEV_ATTR_MIN_OFFSET);
++	u32 ind = get_sys_clk_index();
++
++	return &dpll_mpu[ind][opp];
++}
++
++const struct dpll_params *get_dpll_core_params(void)
++{
++	int ind = get_sys_clk_index();
++
++	return &dpll_core[ind];
++}
++
++const struct dpll_params *get_dpll_per_params(void)
++{
++	int ind = get_sys_clk_index();
++
++	return &dpll_per[ind];
++}
++
++static void scale_vcores_generic(u32 m)
++{
++	int mpu_vdd;
++
++	if (i2c_probe(TPS65218_CHIP_PM))
++		return;
++
++	switch (m) {
++	case 1000:
++		mpu_vdd = TPS65218_DCDC_VOLT_SEL_1330MV;
++		break;
++	case 800:
++		mpu_vdd = TPS65218_DCDC_VOLT_SEL_1260MV;
++		break;
++	case 720:
++		mpu_vdd = TPS65218_DCDC_VOLT_SEL_1200MV;
++		break;
++	case 600:
++		mpu_vdd = TPS65218_DCDC_VOLT_SEL_1100MV;
++		break;
++	case 300:
++		mpu_vdd = TPS65218_DCDC_VOLT_SEL_0950MV;
++		break;
++	default:
++		puts("Unknown MPU clock, not scaling\n");
++		return;
++	}
++
++	/* Set DCDC1 (CORE) voltage to 1.1V */
++	if (tps65218_voltage_update(TPS65218_DCDC1,
++				    TPS65218_DCDC_VOLT_SEL_1100MV)) {
++		printf("%s failure\n", __func__);
++		return;
++	}
++
++	/* Set DCDC2 (MPU) voltage */
++	if (tps65218_voltage_update(TPS65218_DCDC2, mpu_vdd)) {
++		printf("%s failure\n", __func__);
++		return;
++	}
++}
++
++void scale_vcores(void)
++{
++	const struct dpll_params *mpu_params;
++
++	enable_i2c0_pin_mux();
++	i2c_init(CONFIG_SYS_OMAP24_I2C_SPEED, CONFIG_SYS_OMAP24_I2C_SLAVE);
++
++	/* Get the frequency */
++	mpu_params = get_dpll_mpu_params();
++
++	scale_vcores_generic(mpu_params->m);
++}
++
++void set_uart_mux_conf(void)
++{
++	enable_uart0_pin_mux();
++}
++
++void set_mux_conf_regs(void)
++{
++	enable_board_pin_mux();
++}
++
++static void enable_vtt_regulator(void)
++{
++	u32 temp;
++
++	/* enable module */
++	writel(GPIO_CTRL_ENABLEMODULE, AM33XX_GPIO5_BASE + OMAP_GPIO_CTRL);
++
++	/* enable output for GPIO5_7 */
++	writel(GPIO_SETDATAOUT(7),
++	       AM33XX_GPIO5_BASE + OMAP_GPIO_SETDATAOUT);
++	temp = readl(AM33XX_GPIO5_BASE + OMAP_GPIO_OE);
++	temp = temp & ~(GPIO_OE_ENABLE(7));
++	writel(temp, AM33XX_GPIO5_BASE + OMAP_GPIO_OE);
++}
++
++void sdram_init(void)
++{
++	enable_vtt_regulator();
++	config_ddr(400, &ioregs_ddr3, NULL, NULL, &ddr3_sk_emif_regs_400Mhz, 0);
++}
++#endif
++
++/* setup board specific PMIC */
++int power_init_board(void)
++{
++	struct pmic *p;
++
++	power_tps65218_init(I2C_PMIC);
++	p = pmic_get("TPS65218_PMIC");
++	if (p && !pmic_probe(p))
++		puts("PMIC:  TPS65218\n");
++
++	return 0;
++}
++
++int board_init(void)
++{
++	struct l3f_cfg_bwlimiter *bwlimiter = (struct l3f_cfg_bwlimiter *)L3F_CFG_BWLIMITER;
++	u32 mreqprio_0, mreqprio_1, modena_init0_bw_fractional,
++	    modena_init0_bw_integer, modena_init0_watermark_0;
++
++	gd->bd->bi_boot_params = CONFIG_SYS_SDRAM_BASE + 0x100;
++	gpmc_init();
++
++	/* Clear all important bits for DSS errata that may need to be tweaked*/
++	mreqprio_0 = readl(&cdev->mreqprio_0) & MREQPRIO_0_SAB_INIT1_MASK &
++	                   MREQPRIO_0_SAB_INIT0_MASK;
++
++	mreqprio_1 = readl(&cdev->mreqprio_1) & MREQPRIO_1_DSS_MASK;
++
++	modena_init0_bw_fractional = readl(&bwlimiter->modena_init0_bw_fractional) &
++	                                   BW_LIMITER_BW_FRAC_MASK;
++
++	modena_init0_bw_integer = readl(&bwlimiter->modena_init0_bw_integer) &
++	                                BW_LIMITER_BW_INT_MASK;
++
++	modena_init0_watermark_0 = readl(&bwlimiter->modena_init0_watermark_0) &
++	                                 BW_LIMITER_BW_WATERMARK_MASK;
++
++	/* Setting MReq Priority of the DSS*/
++	mreqprio_0 |= 0x77;
++
++	/*
++	 * Set L3 Fast Configuration Register
++	 * Limiting bandwith for ARM core to 700 MBPS
++	 */
++	modena_init0_bw_fractional |= 0x10;
++	modena_init0_bw_integer |= 0x3;
++
++	writel(mreqprio_0, &cdev->mreqprio_0);
++	writel(mreqprio_1, &cdev->mreqprio_1);
++
++	writel(modena_init0_bw_fractional, &bwlimiter->modena_init0_bw_fractional);
++	writel(modena_init0_bw_integer, &bwlimiter->modena_init0_bw_integer);
++	writel(modena_init0_watermark_0, &bwlimiter->modena_init0_watermark_0);
++	return 0;
++}
+diff --git a/board/bytesatwork/m3/board.h b/board/bytesatwork/m3/board.h
+new file mode 100644
+index 0000000..fd7dde5
+--- /dev/null
++++ b/board/bytesatwork/m3/board.h
+@@ -0,0 +1,26 @@
++/*
++ * board.h
++ *
++ * TI AM437x boards information header
++ * Derived from AM335x board.
++ *
++ * Copyright (C) 2013, Texas Instruments, Incorporated - http://www.ti.com/
++ *
++ * SPDX-License-Identifier:	GPL-2.0+
++ */
++
++#ifndef _BOARD_H_
++#define _BOARD_H_
++
++#include <asm/arch/omap.h>
++
++static char *const am43xx_board_name = "byte-engine m3";
++static char *const am43xx_board_rev = "Rev.00";
++
++#define DEV_ATTR_MAX_OFFSET	5
++#define DEV_ATTR_MIN_OFFSET	0
++
++void enable_uart0_pin_mux(void);
++void enable_board_pin_mux(void);
++void enable_i2c0_pin_mux(void);
++#endif
+diff --git a/board/bytesatwork/m3/mux.c b/board/bytesatwork/m3/mux.c
+new file mode 100644
+index 0000000..23d69aa
+--- /dev/null
++++ b/board/bytesatwork/m3/mux.c
+@@ -0,0 +1,71 @@
++/*
++ * mux.c
++ *
++ * Copyright (C) 2013 Texas Instruments Incorporated - http://www.ti.com/
++ *
++ * SPDX-License-Identifier:	GPL-2.0+
++ */
++
++#include <common.h>
++#include <asm/arch/sys_proto.h>
++#include <asm/arch/mux.h>
++#include "board.h"
++
++static struct module_pin_mux uart0_pin_mux[] = {
++	{OFFSET(uart0_rxd), (MODE(0) | PULLUP_EN | RXACTIVE | SLEWCTRL)},
++	{OFFSET(uart0_txd), (MODE(0) | PULLUDDIS | PULLUP_EN | SLEWCTRL)},
++	{-1},
++};
++
++static struct module_pin_mux mmc0_pin_mux[] = {
++	{OFFSET(mmc0_clk), (MODE(0) | PULLUDDIS | RXACTIVE)},  /* MMC0_CLK */
++	{OFFSET(mmc0_cmd), (MODE(0) | PULLUP_EN | RXACTIVE)},  /* MMC0_CMD */
++	{OFFSET(mmc0_dat0), (MODE(0) | PULLUP_EN | RXACTIVE)}, /* MMC0_DAT0 */
++	{OFFSET(mmc0_dat1), (MODE(0) | PULLUP_EN | RXACTIVE)}, /* MMC0_DAT1 */
++	{OFFSET(mmc0_dat2), (MODE(0) | PULLUP_EN | RXACTIVE)}, /* MMC0_DAT2 */
++	{OFFSET(mmc0_dat3), (MODE(0) | PULLUP_EN | RXACTIVE)}, /* MMC0_DAT3 */
++	{-1},
++};
++
++static struct module_pin_mux mmc1_pin_mux[] = {
++	{OFFSET(gpmc_ad0), (MODE(1) | PULLUP_EN | RXACTIVE)},  /* MMC1_DAT0 */
++	{OFFSET(gpmc_ad1), (MODE(1) | PULLUP_EN | RXACTIVE)},  /* MMC1_DAT1 */
++	{OFFSET(gpmc_ad2), (MODE(1) | PULLUP_EN | RXACTIVE)},  /* MMC1_DAT2 */
++	{OFFSET(gpmc_ad3), (MODE(1) | PULLUP_EN | RXACTIVE)},  /* MMC1_DAT3 */
++	{OFFSET(gpmc_ad4), (MODE(1) | PULLUP_EN | RXACTIVE)},  /* MMC1_DAT4 */
++	{OFFSET(gpmc_ad5), (MODE(1) | PULLUP_EN | RXACTIVE)},  /* MMC1_DAT5 */
++	{OFFSET(gpmc_ad6), (MODE(1) | PULLUP_EN | RXACTIVE)},  /* MMC1_DAT6 */
++	{OFFSET(gpmc_ad7), (MODE(1) | PULLUP_EN | RXACTIVE)},  /* MMC1_DAT7 */
++	{OFFSET(gpmc_csn1), (MODE(2) | PULLUP_EN | RXACTIVE)},  /* MMC1_CLK */
++	{OFFSET(gpmc_csn2), (MODE(2) | PULLUP_EN | RXACTIVE)},  /* MMC1_CMD */
++	{-1},
++};
++
++static struct module_pin_mux i2c0_pin_mux[] = {
++	{OFFSET(i2c0_sda), (MODE(0) | PULLUP_EN | RXACTIVE | SLEWCTRL)},
++	{OFFSET(i2c0_scl), (MODE(0) | PULLUP_EN | RXACTIVE | SLEWCTRL)},
++	{-1},
++};
++
++static struct module_pin_mux gpio5_7_pin_mux[] = {
++	{OFFSET(spi0_cs0), (MODE(7) | PULLUP_EN)},	/* GPIO5_7 */
++	{-1},
++};
++
++void enable_uart0_pin_mux(void)
++{
++	configure_module_pin_mux(uart0_pin_mux);
++}
++
++void enable_board_pin_mux(void)
++{
++	configure_module_pin_mux(mmc0_pin_mux);
++	configure_module_pin_mux(mmc1_pin_mux);
++	configure_module_pin_mux(i2c0_pin_mux);
++	configure_module_pin_mux(gpio5_7_pin_mux);
++}
++
++void enable_i2c0_pin_mux(void)
++{
++	configure_module_pin_mux(i2c0_pin_mux);
++}
+diff --git a/configs/byteengine_m3_defconfig b/configs/byteengine_m3_defconfig
+new file mode 100644
+index 0000000..caabbb8
+--- /dev/null
++++ b/configs/byteengine_m3_defconfig
+@@ -0,0 +1,13 @@
++CONFIG_ARM=y
++CONFIG_TARGET_BYTEENGINE_M3=y
++CONFIG_SPL=y
++CONFIG_SYS_EXTRA_OPTIONS="SERIAL1,CONS_INDEX=1"
++# CONFIG_CMD_IMLS is not set
++# CONFIG_CMD_FLASH is not set
++# CONFIG_CMD_SETEXPR is not set
++CONFIG_SPI_FLASH_BAR=y
++CONFIG_SPI_FLASH=y
++
++CONFIG_NAND=n
++CONFIG_CMD_NAND=n
++CONFIG_SPL_NAND_SUPPORT=n
+diff --git a/include/configs/byteengine_m3.h b/include/configs/byteengine_m3.h
+new file mode 100644
+index 0000000..c975cd2
+--- /dev/null
++++ b/include/configs/byteengine_m3.h
+@@ -0,0 +1,149 @@
++/*
++ * based on:
++ * am43xx_evm.h
++ *
++ * Copyright (C) 2013 Texas Instruments Incorporated - http://www.ti.com/
++ *
++ * SPDX-License-Identifier:	GPL-2.0+
++ */
++
++#ifndef __CONFIG_BYTEENGINE_M3_H
++#define __CONFIG_BYTEENGINE_M3_H
++
++#define CONFIG_AM43XX
++
++#undef CONFIG_NAND
++#undef CONFIG_CMD_NAND
++#undef CONFIG_SPL_NAND_SUPPORT
++
++#define CONFIG_CMD_FAT
++
++#define CONFIG_ARCH_CPU_INIT
++#define CONFIG_SYS_CACHELINE_SIZE       32
++#define CONFIG_MAX_RAM_BANK_SIZE	(1024 << 21)	/* 2GB */
++#define CONFIG_SYS_TIMERBASE		0x48040000	/* Use Timer2 */
++
++#include <asm/arch/omap.h>
++
++/* NS16550 Configuration */
++#define CONFIG_SYS_NS16550
++#define CONFIG_SYS_NS16550_SERIAL
++#define CONFIG_SYS_NS16550_REG_SIZE	(-4)
++#define CONFIG_SYS_NS16550_CLK		48000000
++
++/* I2C Configuration */
++#define CONFIG_CMD_EEPROM
++#define CONFIG_ENV_IS_NOWHERE
++#define CONFIG_SYS_I2C_EEPROM_ADDR	0x50	/* Main EEPROM */
++#define CONFIG_SYS_I2C_EEPROM_ADDR_LEN	2
++
++/* Power */
++#define CONFIG_POWER
++#define CONFIG_POWER_I2C
++#define CONFIG_POWER_TPS65218
++
++#define CONFIG_SPL_TEXT_BASE		0x402F4000
++#define CONFIG_SPL_MAX_SIZE		(220 << 10)	/* 220KB */
++#define CONFIG_SYS_SPL_ARGS_ADDR	(CONFIG_SYS_SDRAM_BASE + \
++					 (128 << 20))
++#define CONFIG_SPL_POWER_SUPPORT
++
++/* Enabling L2 Cache */
++#define CONFIG_SYS_L2_PL310
++#define CONFIG_SYS_PL310_BASE	0x48242000
++#define CONFIG_SYS_CACHELINE_SIZE	32
++
++/*
++ * Since SPL did pll and ddr initialization for us,
++ * we don't need to do it twice.
++ */
++#if !defined(CONFIG_SPL_BUILD)
++#define CONFIG_SKIP_LOWLEVEL_INIT
++#endif
++
++/*
++ * When building U-Boot such that there is no previous loader
++ * we need to call board_early_init_f.  This is taken care of in
++ * s_init when we have SPL used.
++ */
++#if !defined(CONFIG_SKIP_LOWLEVEL_INIT) && !defined(CONFIG_SPL)
++#define CONFIG_BOARD_EARLY_INIT_F
++#endif
++
++/* Now bring in the rest of the common code. */
++#include <configs/ti_armv7_omap.h>
++
++/* Always 64 KiB env size */
++#define CONFIG_ENV_SIZE			(64 << 10)
++
++#define CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG
++
++/* Clock Defines */
++#define V_OSCK				24000000  /* Clock output from T2 */
++#define V_SCLK				(V_OSCK)
++
++/* NS16550 Configuration */
++#define CONFIG_SYS_NS16550_COM1		0x44e09000
++
++#define CONFIG_SPL_LDSCRIPT		"$(CPUDIR)/omap-common/u-boot-spl.lds"
++
++/* SPI */
++#undef CONFIG_SPI
++
++#define CONFIG_TI_EDMA3
++
++#ifndef CONFIG_SPL_BUILD
++#define CONFIG_EXTRA_ENV_SETTINGS \
++	DEFAULT_LINUX_BOOT_ENV \
++	"fdtfile=devtree.dtb\0" \
++	"bootfile=uImage\0" \
++	"console=ttyO0,115200n8\0" \
++	"optargs=\0" \
++	"mmcdev=0\0" \
++	"mmcroot=/dev/mmcblk0p2 rw\0" \
++	"mmcrootfstype=ext4 rootwait\0" \
++	"mmcargs=setenv bootargs console=${console} " \
++		"${optargs} " \
++		"root=${mmcroot} " \
++		"rootfstype=${mmcrootfstype}\0" \
++
++#define CONFIG_BOOTCOMMAND \
++	"mmc dev ${mmcdev}; " \
++	"mmc rescan; " \
++	"run mmcargs; " \
++	"fatload mmc 0 ${loadaddr} ${bootfile}; " \
++	"fatload mmc 0 ${fdtaddr} ${fdtfile}; " \
++	"bootm ${loadaddr} - ${fdtaddr}; " \
++
++#endif
++
++#ifndef CONFIG_SPL_BUILD
++/* CPSW Ethernet */
++#define CONFIG_CMD_DHCP
++#define CONFIG_CMD_PING
++#define CONFIG_CMD_MII
++#define CONFIG_MII
++#define CONFIG_BOOTP_DEFAULT
++#define CONFIG_BOOTP_DNS
++#define CONFIG_BOOTP_DNS2
++#define CONFIG_BOOTP_SEND_HOSTNAME
++#define CONFIG_BOOTP_GATEWAY
++#define CONFIG_BOOTP_SUBNETMASK
++#define CONFIG_NET_RETRY_COUNT		10
++#define CONFIG_PHY_GIGE
++#endif
++
++#define CONFIG_DRIVER_TI_CPSW
++#define CONFIG_PHYLIB
++
++#define CONFIG_SPL_ENV_SUPPORT
++#define CONFIG_SPL_NET_VCI_STRING	"AM43xx U-Boot SPL"
++
++#if defined(CONFIG_SPL_BUILD) && defined(CONFIG_SPL_ETH_SUPPORT)
++#define CONFIG_ENV_IS_NOWHERE
++#define CONFIG_SPL_NET_SUPPORT
++#endif
++
++#define CONFIG_SYS_RX_ETH_BUFFER	64
++
++#endif
+-- 
+2.1.4
+
