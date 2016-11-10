@@ -13,11 +13,12 @@ This layer depends on:
 
 	URI: git://git.yoctoproject.org/meta-ti
 	layer: meta-ti
-	branch: krogoth
+	branch: master
+	commit: ec712fdccb9490fb134a3fe59cdc636d438948f5
 
 	URI: git://git.openembedded.org/meta-openembedded
 	layers: meta-oe, meta-networking, meta-python
-	branch: krogoth
+	branch: morty
 
 
 BSP
