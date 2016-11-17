@@ -1,7 +1,13 @@
 # Copyright (C) 2016 Oliver Stäbler <oliver.staebler@bytesatwork.ch>
 # Released under the MIT license (see COPYING.MIT for the terms)
 
+# TODO update to current version. For now, this fixes the color swap issue.
+SRCREV = "ba05e8fda276bd3a1b2ef970a868b229d5184246"
+PV = "4.4.9+git${SRCPV}"
+
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}-4.4:"
+
+B = "${S}"
 
 SRC_URI += " \
 	file://0001-device-tree-support-for-m2-and-bytepanel.patch \
