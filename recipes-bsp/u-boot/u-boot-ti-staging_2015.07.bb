@@ -34,6 +34,9 @@ SRC_URI += " \
 	file://0010-am335x_m2-boot-from-nand-if-mmc-has-no-kernel.patch \
 	file://0011-byteengine_m3-add-initial-byteENGINE-AM437X-support.patch \
 	file://0012-add-support-for-gcc6.patch \
+	file://0013-ddr3-fix-timings-for-256-and-512MB-DDR3-ram-add-ramc.patch \
+	file://0014-m2config-add-DDR3-512MB-ram-new-PCB-Rev-and-Nand.patch \
+	file://0015-m2config-change-ram-detection-order-first-try-eeprom.patch \
 "
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}-2015.07:"
 

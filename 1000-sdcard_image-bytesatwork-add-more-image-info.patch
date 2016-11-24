@@ -1,0 +1,47 @@
+From 887306066297787b08332b3bb73d00bd60ca7e2c Mon Sep 17 00:00:00 2001
+From: Daniel Ammann <daniel.ammann@bytesatwork.ch>
+Date: Thu, 17 Nov 2016 17:30:35 +0100
+Subject: [PATCH] sdcard_image-bytesatwork: add more image info
+
+---
+ classes/sdcard_image-bytesatwork.bbclass | 17 +++++++++++++++++
+ 1 file changed, 17 insertions(+)
+
+diff --git a/classes/sdcard_image-bytesatwork.bbclass b/classes/sdcard_image-bytesatwork.bbclass
+index dfd12ea..e861074 100644
+--- a/classes/sdcard_image-bytesatwork.bbclass
++++ b/classes/sdcard_image-bytesatwork.bbclass
+@@ -80,6 +80,9 @@ SDIMG_COMPRESSION ?= "gzip"
+ FATPAYLOAD ?= ""
+ 
+ IMAGEDATESTAMP = "${@time.strftime('%Y.%m.%d',time.gmtime())}"
++PPvk="${@d.getVar('PREFERRED_PROVIDER_virtual/kernel', True) or ''}"
++PVtmp="PREFERRED_VERSION_${PPvk}"
++PVlx="${@d.getVar(PVtmp, True) or ''}"
+ 
+ IMAGE_CMD_bytesatwork-sdimg () {
+ 
+@@ -156,6 +159,20 @@ EOF
+ 		done
+ 	fi
+ 
++	echo "BUILD_HOST: `hostname`" >> ${WORKDIR}/${IMAGE_VERSIONINFO_NAME}
++	echo "DATETIME: ${DATETIME}" >> ${WORKDIR}/${IMAGE_VERSIONINFO_NAME}
++	echo "MACHINE: ${MACHINE}" >> ${WORKDIR}/${IMAGE_VERSIONINFO_NAME}
++	echo "DISTRO_VERSION: ${DISTRO_VERSION}" >> ${WORKDIR}/${IMAGE_VERSIONINFO_NAME}
++	echo "IMAGE: ${PN}" >> ${WORKDIR}/${IMAGE_VERSIONINFO_NAME}
++	echo "IMAGE_NAME: ${IMAGE_NAME}" >> ${WORKDIR}/${IMAGE_VERSIONINFO_NAME}
++	echo "IMAGEDATESTAMP: ${IMAGEDATESTAMP}" >> ${WORKDIR}/${IMAGE_VERSIONINFO_NAME}
++	echo "PREFERRED_PROVIDER_virtual/kernel: ${PREFERRED_PROVIDER_virtual/kernel}" >> ${WORKDIR}/${IMAGE_VERSIONINFO_NAME}
++	echo "${PVtmp}: ${PVlx}" >> ${WORKDIR}/${IMAGE_VERSIONINFO_NAME}
++	echo "KERNEL_DEVICETREE: ${KERNEL_DEVICETREE}" >> ${WORKDIR}/${IMAGE_VERSIONINFO_NAME}
++	echo "PREFERRED_PROVIDER_u-boot: ${PREFERRED_PROVIDER_u-boot}" >> ${WORKDIR}/${IMAGE_VERSIONINFO_NAME}
++	echo "UBOOT_MACHINE: ${UBOOT_MACHINE}" >> ${WORKDIR}/${IMAGE_VERSIONINFO_NAME}
++	cat ${IMAGE_MANIFEST} >> ${WORKDIR}/${IMAGE_VERSIONINFO_NAME}
++
+ 	# Add stamp file
+ 	echo "${IMAGE_NAME}-${IMAGEDATESTAMP}" > ${WORKDIR}/image-version-info
+ 	mcopy -i ${WORKDIR}/${IMAGE_VFAT_NAME} -v ${WORKDIR}/image-version-info ::
+-- 
+2.1.4
+
