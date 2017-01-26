@@ -1,7 +1,7 @@
-From f6e0240a25e20efd033b526640e781274365dba9 Mon Sep 17 00:00:00 2001
+From 550e5fc860546dabd989fc3061ecd17284e47cc7 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Oliver=20St=C3=A4bler?= <oliver.staebler@bytesatwork.ch>
 Date: Thu, 12 May 2016 19:20:41 +0200
-Subject: [PATCH 9/9] am335x_m2: Adapt to ti-u-boot-2015.07 and cleanup
+Subject: [PATCH 09/14] am335x_m2: Adapt to ti-u-boot-2015.07 and cleanup
 
 Adapt existing files to ti-u-boot-2015.07 and create needed files based on
 am335x_evm.
@@ -24,12 +24,12 @@ Signed-off-by: Daniel Ammann <daniel.ammann@bytesatwork.ch>
  create mode 100644 configs/am335x_m2_defconfig
 
 diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
-index 3403bcf..8b6e163 100644
+index 2960499..d833855 100644
 --- a/arch/arm/Kconfig
 +++ b/arch/arm/Kconfig
-@@ -392,6 +392,16 @@ config TARGET_AM335X_EVM
- 	select DM_GPIO
- 	select CREATE_BOARD_SYMLINK
+@@ -317,6 +317,16 @@ config TARGET_RUT
+ 	select CPU_V7
+ 	select SUPPORT_SPL
  
 +config TARGET_AM335X_M2
 +	bool "Support am335x_m2"
@@ -41,12 +41,12 @@ index 3403bcf..8b6e163 100644
 +	help
 +	  Support for the m2 module by bytes at work.
 +
- config TARGET_BAV335X
- 	bool "Support bav335x"
+ config TARGET_TI814X_EVM
+ 	bool "Support ti814x_evm"
  	select CPU_V7
-@@ -969,6 +979,7 @@ source "board/sunxi/Kconfig"
+@@ -803,6 +813,7 @@ source "board/sunxi/Kconfig"
  source "board/syteco/zmx25/Kconfig"
- source "board/tbs/tbs2910/Kconfig"
+ source "board/tcl/sl50/Kconfig"
  source "board/ti/am335x/Kconfig"
 +source "board/bytesatwork/am335x/Kconfig"
  source "board/ti/am43xx/Kconfig"

@@ -1,7 +1,7 @@
-From b4b36c7b183ed545202650ccffff2b4466c74e96 Mon Sep 17 00:00:00 2001
+From 3399d1d0b0f863999336b2be8a83cbd03fc85667 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Oliver=20St=C3=A4bler?= <oliver.staebler@bytesatwork.ch>
 Date: Thu, 4 Jun 2015 18:33:23 +0200
-Subject: [PATCH 4/9] am335x_m2: Cleanup unused code
+Subject: [PATCH 04/14] am335x_m2: Cleanup unused code
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit

@@ -1,7 +1,7 @@
-From 46435599319b8af8457de51726fb5ea65bc9110b Mon Sep 17 00:00:00 2001
+From f262efb2074a261ce9684f6eb4675e5640a408e7 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Stephan=20D=C3=BCnner?= <stephan.duenner@bytesatwork.ch>
 Date: Thu, 3 Nov 2016 10:05:21 +0100
-Subject: [PATCH 13/15] ddr3: fix timings for 256 and 512MB DDR3 ram, add
+Subject: [PATCH 12/14] ddr3: fix timings for 256 and 512MB DDR3 ram, add
  ramconfig 3 for 512MB
 
 ---
@@ -10,10 +10,10 @@ Subject: [PATCH 13/15] ddr3: fix timings for 256 and 512MB DDR3 ram, add
  2 files changed, 152 insertions(+), 4 deletions(-)
 
 diff --git a/arch/arm/include/asm/arch-am33xx/ddr_defs.h b/arch/arm/include/asm/arch-am33xx/ddr_defs.h
-index 43e122e..ea81975 100644
+index c71cfd0..0b2a188 100644
 --- a/arch/arm/include/asm/arch-am33xx/ddr_defs.h
 +++ b/arch/arm/include/asm/arch-am33xx/ddr_defs.h
-@@ -155,6 +155,39 @@
+@@ -163,6 +163,39 @@
  #define K4B2G1646EBIH9_PHY_WR_DATA		0x76
  #define K4B2G1646EBIH9_IOCTRL_VALUE		0x18B
  

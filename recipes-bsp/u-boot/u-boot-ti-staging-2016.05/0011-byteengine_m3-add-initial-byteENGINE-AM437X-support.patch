@@ -1,7 +1,7 @@
-From 69cd0d3c56536101d7fbbd9beddcb8c119bba9d2 Mon Sep 17 00:00:00 2001
+From 286c64dc1c226d49a7e2ed57eb9bcd271e8cba06 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Urs=20F=C3=A4ssler?= <urs.fassler@bytesatwork.ch>
 Date: Tue, 18 Aug 2015 14:56:56 +0200
-Subject: [PATCH 11/12] byteengine_m3: add initial byteENGINE AM437X support
+Subject: [PATCH 11/14] byteengine_m3: add initial byteENGINE AM437X support
 
 ---
  arch/arm/Kconfig                |   6 +
@@ -22,10 +22,10 @@ Subject: [PATCH 11/12] byteengine_m3: add initial byteENGINE AM437X support
  create mode 100644 include/configs/byteengine_m3.h
 
 diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
-index 8b6e163..12e3106 100644
+index d833855..595924d 100644
 --- a/arch/arm/Kconfig
 +++ b/arch/arm/Kconfig
-@@ -402,6 +402,11 @@ config TARGET_AM335X_M2
+@@ -327,6 +327,11 @@ config TARGET_AM335X_M2
  	help
  	  Support for the m2 module by bytes at work.
  
@@ -34,10 +34,10 @@ index 8b6e163..12e3106 100644
 +	select CPU_V7
 +	select SUPPORT_SPL
 +
- config TARGET_BAV335X
- 	bool "Support bav335x"
+ config TARGET_TI814X_EVM
+ 	bool "Support ti814x_evm"
  	select CPU_V7
-@@ -981,6 +986,7 @@ source "board/tbs/tbs2910/Kconfig"
+@@ -815,6 +820,7 @@ source "board/tcl/sl50/Kconfig"
  source "board/ti/am335x/Kconfig"
  source "board/bytesatwork/am335x/Kconfig"
  source "board/ti/am43xx/Kconfig"

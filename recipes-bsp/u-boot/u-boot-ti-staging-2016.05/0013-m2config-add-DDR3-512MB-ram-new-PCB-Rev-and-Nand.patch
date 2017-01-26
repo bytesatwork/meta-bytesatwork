@@ -1,7 +1,7 @@
-From 44d0100ff37a001c7377be6c8891d3714b3ed6fc Mon Sep 17 00:00:00 2001
+From 50b9c5b8a233d9eac3d454bdbc1bdfa163be78e3 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Stephan=20D=C3=BCnner?= <stephan.duenner@bytesatwork.ch>
 Date: Thu, 3 Nov 2016 10:24:22 +0100
-Subject: [PATCH 14/15] m2config: add DDR3 512MB ram, new PCB Rev and Nand
+Subject: [PATCH 13/14] m2config: add DDR3 512MB ram, new PCB Rev and Nand
 
 ---
  board/bytesatwork/am335x/m2config/m2config.c | 16 +++++++++++++---

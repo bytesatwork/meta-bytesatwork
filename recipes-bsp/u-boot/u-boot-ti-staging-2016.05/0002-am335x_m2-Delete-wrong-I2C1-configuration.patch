@@ -1,7 +1,7 @@
-From e366b439005fa76256393f95421d714928238aeb Mon Sep 17 00:00:00 2001
+From 5d587693cb249ea470a9a151f0fafcbc44fd2c81 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Oliver=20St=C3=A4bler?= <oliver.staebler@bytesatwork.ch>
 Date: Thu, 4 Jun 2015 15:17:54 +0200
-Subject: [PATCH 2/9] am335x_m2: Delete wrong I2C1 configuration
+Subject: [PATCH 02/14] am335x_m2: Delete wrong I2C1 configuration
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit

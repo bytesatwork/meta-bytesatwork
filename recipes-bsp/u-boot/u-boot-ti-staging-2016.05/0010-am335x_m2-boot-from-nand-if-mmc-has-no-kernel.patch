@@ -1,7 +1,7 @@
-From 36ca0188e34654a6ff2deaa3109b7a43963a708b Mon Sep 17 00:00:00 2001
+From 127be78f055897ceb9909351c5c0ac181b35b3fb Mon Sep 17 00:00:00 2001
 From: Daniel Ammann <daniel.ammann@bytesatwork.ch>
 Date: Thu, 14 Jul 2016 17:55:31 +0200
-Subject: [PATCH] am335x_m2: boot from nand if mmc has no kernel
+Subject: [PATCH 10/14] am335x_m2: boot from nand if mmc has no kernel
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit

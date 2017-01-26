@@ -1,7 +1,7 @@
-From a1b869d54a1532ce53447fbe68a11ee2a84e0376 Mon Sep 17 00:00:00 2001
+From 9a69b5676c87751abf1177db6011f94ac48afe27 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Oliver=20St=C3=A4bler?= <oliver.staebler@bytesatwork.ch>
 Date: Thu, 4 Jun 2015 15:29:02 +0200
-Subject: [PATCH 3/9] am335x_m2: Remove wrong GPIO muxing
+Subject: [PATCH 03/14] am335x_m2: Remove wrong GPIO muxing
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit

@@ -1,7 +1,7 @@
-From e06eb573c7a3dca9a9d471bd368697572a438cde Mon Sep 17 00:00:00 2001
+From 9912a3303cf7e16a821d393895e489803318f5ea Mon Sep 17 00:00:00 2001
 From: Daniel Ammann <daniel.ammann@bytesatwork.ch>
 Date: Thu, 17 Nov 2016 16:47:26 +0100
-Subject: [PATCH 15/15] m2config: change ram detection order: first try eeprom,
+Subject: [PATCH 14/14] m2config: change ram detection order: first try eeprom,
  then use fallback
 
 ---

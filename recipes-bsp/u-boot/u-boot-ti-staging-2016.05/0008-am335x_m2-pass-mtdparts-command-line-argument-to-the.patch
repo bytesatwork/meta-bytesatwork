@@ -1,7 +1,7 @@
-From 70c70b3d2ad6ed8062747d8a6a25f4f9db685250 Mon Sep 17 00:00:00 2001
+From b2d5781f989d6ac47d6faec328f324c0d477de73 Mon Sep 17 00:00:00 2001
 From: Daniel Ammann <daniel.ammann@bytesatwork.ch>
 Date: Thu, 3 Dec 2015 20:40:51 +0100
-Subject: [PATCH 8/9] am335x_m2: pass mtdparts command line argument to the
+Subject: [PATCH 08/14] am335x_m2: pass mtdparts command line argument to the
  kernel also with mmc
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
