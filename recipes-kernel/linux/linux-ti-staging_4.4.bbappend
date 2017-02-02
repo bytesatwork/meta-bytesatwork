@@ -17,6 +17,8 @@ SRC_URI += " \
 	file://0010-ARM-dts-byteengine-m3-Add-initial-dtsi.patch \
 	file://0011-ARM-dts-byteboard-Add-initial-dts.patch \
 	file://0012-ARM-byteboard_defconfig-Add-initial-defconfig.patch \
+	file://0013-dts-bytepanel-switch-blue-red-wiring-for-et070080dh6.patch \
+	file://0014-devicetree-adding-et10-display.patch \
 "
 
 deltask compileconfigs
