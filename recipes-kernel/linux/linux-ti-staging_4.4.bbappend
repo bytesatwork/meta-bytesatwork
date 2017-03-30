@@ -12,7 +12,6 @@ SRC_URI += " \
 	file://0006-dts-remove-unsupported-displays-etm043080adh6-and-et.patch \
 	file://0007-devicetree-adding-muxing-and-enable-UART1.patch \
 	file://0008-defconfig-devicetree-adding-can-support.patch \
-	file://0009-dts-bytepanel-switch-blue-red-wiring-for-et070080dh6.patch \
 	file://0009-ARM-dts-am43xx-add-AM437x-pin-names.patch \
 	file://0010-ARM-dts-byteengine-m3-Add-initial-dtsi.patch \
 	file://0011-ARM-dts-byteboard-Add-initial-dts.patch \
