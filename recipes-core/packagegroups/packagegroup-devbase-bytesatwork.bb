@@ -13,7 +13,7 @@ RDEPENDS_${PN} = "\
 	binutils \
 	binutils-symlinks \
 	bzip2 \
-	canutils \
+	can-utils \
 	coreutils \
 	dosfstools \
 	e2fsprogs \
@@ -37,6 +37,7 @@ RDEPENDS_${PN} = "\
 	perf \
 	procps \
 	screen \
+	startcan \
 	strace \
 	tar \
 	tcpdump \
