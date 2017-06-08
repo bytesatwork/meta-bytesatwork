@@ -1,3 +1,5 @@
+MLO_IMAGE ??= "${SPL_BINARY}"
+
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}-2016.05:"
 SRC_URI += " \
 	file://0001-am335x_m2-Initial-commit.patch \
@@ -15,4 +17,10 @@ SRC_URI += " \
 	file://0013-m2config-add-DDR3-512MB-ram-new-PCB-Rev-and-Nand.patch \
 	file://0014-m2config-change-ram-detection-order-first-try-eeprom.patch \
 	file://0015-u-boot-2016.05-support-for-m2.patch \
+	file://0016-add-M2-Rev4-with-EMMC-and-SPI-Nor.patch \
 "
+
+do_deploy_append_bytepanel-emmc () {
+	install -d ${DEPLOY_DIR_IMAGE}
+	install ${B}/${SPL_BINARY}.byteswap ${DEPLOY_DIR_IMAGE}/${MLO_IMAGE}.byteswap
+}
