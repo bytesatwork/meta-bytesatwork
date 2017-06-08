@@ -18,6 +18,9 @@ SRC_URI += " \
 	file://0012-ARM-byteboard_defconfig-Add-initial-defconfig.patch \
 	file://0013-dts-bytepanel-switch-blue-red-wiring-for-et070080dh6.patch \
 	file://0014-devicetree-adding-et10-display.patch \
+	file://0015-bytepanel-defconfig-add-spi-nor.patch \
+	file://0016-spinor-adding-m25pe40.patch \
+	file://0017-byteenging-m2-adding-emmc-support-in-dts.patch \
 "
 
 deltask compileconfigs
