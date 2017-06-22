@@ -18,6 +18,7 @@ SRC_URI += " \
 	file://0014-m2config-change-ram-detection-order-first-try-eeprom.patch \
 	file://0015-u-boot-2016.05-support-for-m2.patch \
 	file://0016-add-M2-Rev4-with-EMMC-and-SPI-Nor.patch \
+	file://0017-EMIF-Fix-lcd-pixel-shift.patch \
 "
 
 do_deploy_append_bytepanel-emmc () {
