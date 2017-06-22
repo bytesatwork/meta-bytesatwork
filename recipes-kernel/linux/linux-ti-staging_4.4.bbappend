@@ -22,6 +22,7 @@ SRC_URI += " \
 	file://0016-spinor-adding-m25pe40.patch \
 	file://0017-byteenging-m2-adding-emmc-support-in-dts.patch \
 	file://0018-dts-bytepanel-add-label-for-display-and-enable-it-fo.patch \
+	file://0019-logo-adding-baw-logos-800x480-and-1024x600.patch \
 "
 
 deltask compileconfigs
