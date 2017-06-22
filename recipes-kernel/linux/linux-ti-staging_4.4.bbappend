@@ -21,6 +21,7 @@ SRC_URI += " \
 	file://0015-bytepanel-defconfig-add-spi-nor.patch \
 	file://0016-spinor-adding-m25pe40.patch \
 	file://0017-byteenging-m2-adding-emmc-support-in-dts.patch \
+	file://0018-dts-bytepanel-add-label-for-display-and-enable-it-fo.patch \
 "
 
 deltask compileconfigs
