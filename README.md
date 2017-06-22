@@ -13,11 +13,12 @@ This layer depends on:
 
 	URI: git://git.yoctoproject.org/meta-ti
 	layer: meta-ti
-	branch: morty
+	branch: master
+	commit: 952104c9032b409cbeb2c16c28e17462efa016fe
 
 	URI: git://git.openembedded.org/meta-openembedded
 	layers: meta-oe, meta-networking, meta-python
-	branch: morty
+	branch: pyro
 
 
 BSP
