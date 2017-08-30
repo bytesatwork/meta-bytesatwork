@@ -1,0 +1,51 @@
+From c84da0a6344f3e265b8b80166b61b99429c5e2fd Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Stephan=20D=C3=BCnner?= <stephan.duenner@bytesatwork.ch>
+Date: Tue, 29 Aug 2017 08:31:19 +0200
+Subject: [PATCH 17/18] EMIF: Set OCP_Config to fix LCD pixel shift
+
+---
+ arch/arm/include/asm/arch-am33xx/ddr_defs.h | 1 +
+ arch/arm/include/asm/emif.h                 | 1 +
+ board/bytesatwork/am335x/ram.c              | 2 ++
+ 3 files changed, 4 insertions(+)
+
+diff --git a/arch/arm/include/asm/arch-am33xx/ddr_defs.h b/arch/arm/include/asm/arch-am33xx/ddr_defs.h
+index 0b2a18818b..4416eeceef 100644
+--- a/arch/arm/include/asm/arch-am33xx/ddr_defs.h
++++ b/arch/arm/include/asm/arch-am33xx/ddr_defs.h
+@@ -32,6 +32,7 @@
+  */
+ #define EMIF_OCP_CONFIG_BEAGLEBONE_BLACK	0x00141414
+ #define EMIF_OCP_CONFIG_AM335X_EVM		0x003d3d3d
++#define EMIF_OCP_CONFIG_AM335X_BAW_M2		0x00383838
+ 
+ /* Micron MT47H128M16RT-25E */
+ #define MT47H128M16RT25E_EMIF_READ_LATENCY	0x100005
+diff --git a/arch/arm/include/asm/emif.h b/arch/arm/include/asm/emif.h
+index 9a46340deb..1a30bdd3e6 100644
+--- a/arch/arm/include/asm/emif.h
++++ b/arch/arm/include/asm/emif.h
+@@ -23,6 +23,7 @@
+ #define EMIF_4D					0x4
+ #define EMIF_4D5				0x5
+ 
++#define EMIF1_OCP_CONFIG			EMIF1_BASE + 0x54
+ /* Registers shifts, masks and values */
+ 
+ /* EMIF_MOD_ID_REV */
+diff --git a/board/bytesatwork/am335x/ram.c b/board/bytesatwork/am335x/ram.c
+index 6da3a60bf5..b00d4a061c 100644
+--- a/board/bytesatwork/am335x/ram.c
++++ b/board/bytesatwork/am335x/ram.c
+@@ -285,6 +285,8 @@ void sdram_init(void)
+ 	/* TODO: Initialize UARTS earlier again so that we can print the configuration */
+ 	//printf("use ram configuration %u (%s)\n", ram->config, m2config_get_ram_name(ram->config));
+ 	ram->init();
++	/* Set OCP_CONFIG (fix LCD Pixel shift during operation) */
++	writel(EMIF_OCP_CONFIG_AM335X_BAW_M2, EMIF1_OCP_CONFIG);
+ }
+ 
+ const struct dpll_params *get_dpll_ddr_params(void)
+-- 
+2.11.0
+
