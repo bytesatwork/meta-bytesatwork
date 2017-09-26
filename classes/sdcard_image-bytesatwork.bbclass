@@ -58,13 +58,13 @@ IMAGE_ROOTFS_ALIGNMENT = "4096"
 SDIMG_ROOTFS_TYPE ?= "ext3"
 SDIMG_ROOTFS = "${IMGDEPLOYDIR}/${IMAGE_NAME}.rootfs.${SDIMG_ROOTFS_TYPE}"
 
-IMAGE_DEPENDS_bytesatwork-sdimg = " \
-			parted-native \
-			mtools-native \
-			dosfstools-native \
-			virtual/kernel \
-			${IMAGE_BOOTLOADER} \
-			"
+do_image_bytesatwork_sdimg[depends] += " \
+	parted-native:do_populate_sysroot \
+	mtools-native:do_populate_sysroot \
+	dosfstools-native:do_populate_sysroot \
+	virtual/kernel:do_populate_sysroot \
+	${IMAGE_BOOTLOADER}:do_populate_sysroot \
+"
 
 # SD card image name
 SDIMG = "${IMGDEPLOYDIR}/${IMAGE_NAME}.sdimg"
@@ -161,14 +161,14 @@ EOF
 	mcopy -i ${WORKDIR}/${IMAGE_VFAT_NAME} -v ${WORKDIR}/image-version-info ::
 
 	# Burn Partitions
-	dd if=${WORKDIR}/${IMAGE_VFAT_NAME} of=${SDIMG} conv=notrunc seek=1 bs=$(expr ${IMAGE_ROOTFS_ALIGNMENT} \* 1024) && sync && sync
+	dd if=${WORKDIR}/${IMAGE_VFAT_NAME} of=${SDIMG} conv=notrunc seek=1 bs=$(expr ${IMAGE_ROOTFS_ALIGNMENT} \* 1024)
 	# If SDIMG_ROOTFS_TYPE is a .xz file use xzcat
 	if echo "${SDIMG_ROOTFS_TYPE}" | egrep -q "*\.xz"
 	then
-		xzcat ${SDIMG_ROOTFS} | dd of=${SDIMG} conv=notrunc seek=1 bs=$(expr 1024 \* ${BOOT_SPACE_ALIGNED} + ${IMAGE_ROOTFS_ALIGNMENT} \* 1024) && sync && sync
+		xzcat ${SDIMG_ROOTFS} | dd of=${SDIMG} conv=notrunc seek=1 bs=$(expr 1024 \* ${BOOT_SPACE_ALIGNED} + ${IMAGE_ROOTFS_ALIGNMENT} \* 1024)
 	else
 		resize2fs ${SDIMG_ROOTFS} ${ROOTFS_SIZE_ALIGNED}K
-		dd if=${SDIMG_ROOTFS} of=${SDIMG} conv=notrunc seek=1 bs=$(expr 1024 \* ${BOOT_SPACE_ALIGNED} + ${IMAGE_ROOTFS_ALIGNMENT} \* 1024) && sync && sync
+		dd if=${SDIMG_ROOTFS} of=${SDIMG} conv=notrunc seek=1 bs=$(expr 1024 \* ${BOOT_SPACE_ALIGNED} + ${IMAGE_ROOTFS_ALIGNMENT} \* 1024)
 	fi
 
 	ln -sf ${SDIMG} ${DEPLOY_DIR_IMAGE}/${IMAGE_BASENAME}.sdimg
