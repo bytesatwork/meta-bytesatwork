@@ -1,0 +1,291 @@
+From 2fe445c2086a9bc836d3f8eb8f02211361c8c0bc Mon Sep 17 00:00:00 2001
+From: Daniel Ammann <daniel.ammann@bytesatwork.ch>
+Date: Thu, 2 Nov 2017 15:45:18 +0100
+Subject: [PATCH 19/25] video/logo: Add option to select largest logo
+ automatically
+
+---
+ drivers/video/fbdev/core/fbmem.c |  21 ++++--
+ drivers/video/logo/Kconfig       |   7 ++
+ drivers/video/logo/logo.c        | 158 +++++++++++++++++++++++----------------
+ include/linux/linux_logo.h       |   4 +
+ 4 files changed, 120 insertions(+), 70 deletions(-)
+
+diff --git a/drivers/video/fbdev/core/fbmem.c b/drivers/video/fbdev/core/fbmem.c
+index 76c1ad96fb37..5101e2af8daa 100644
+--- a/drivers/video/fbdev/core/fbmem.c
++++ b/drivers/video/fbdev/core/fbmem.c
+@@ -595,7 +595,7 @@ static inline int fb_show_extra_logos(struct fb_info *info, int y, int rotate)
+ int fb_prepare_logo(struct fb_info *info, int rotate)
+ {
+ 	int depth = fb_get_color_depth(&info->var, &info->fix);
+-	unsigned int yres;
++	unsigned int xres, yres;
+ 
+ 	memset(&fb_logo, 0, sizeof(struct logo_data));
+ 
+@@ -616,18 +616,25 @@ int fb_prepare_logo(struct fb_info *info, int rotate)
+ 		depth = 4;
+ 	}
+ 
+-	/* Return if no suitable logo was found */
++	if (rotate == FB_ROTATE_UR || rotate == FB_ROTATE_UD) {
++		xres = info->var.xres;
++		yres = info->var.yres;
++	} else {
++		xres = info->var.yres;
++		yres = info->var.xres;
++	}
++
++#ifdef CONFIG_FB_LOGO_LARGEST
++	fb_logo.logo = fb_find_logo_largest(depth, xres, yres);
++#else
+ 	fb_logo.logo = fb_find_logo(depth);
++#endif
+ 
++	/* Return if no suitable logo was found */
+ 	if (!fb_logo.logo) {
+ 		return 0;
+ 	}
+ 
+-	if (rotate == FB_ROTATE_UR || rotate == FB_ROTATE_UD)
+-		yres = info->var.yres;
+-	else
+-		yres = info->var.xres;
+-
+ 	if (fb_logo.logo->height > yres) {
+ 		fb_logo.logo = NULL;
+ 		return 0;
+diff --git a/drivers/video/logo/Kconfig b/drivers/video/logo/Kconfig
+index 0037104d66ac..72bd18581598 100644
+--- a/drivers/video/logo/Kconfig
++++ b/drivers/video/logo/Kconfig
+@@ -15,6 +15,13 @@ config FB_LOGO_EXTRA
+ 	depends on FB=y
+ 	default y if SPU_BASE
+ 
++config FB_LOGO_LARGEST
++	bool "Use largest"
++	default n
++	help
++	  Returns the largest available bootup logo that fits the given
++	  resolution.
++
+ config LOGO_LINUX_MONO
+ 	bool "Standard black and white Linux logo"
+ 	default y
+diff --git a/drivers/video/logo/logo.c b/drivers/video/logo/logo.c
+index b6bc4a0bda2a..93f3b5b4f36e 100644
+--- a/drivers/video/logo/logo.c
++++ b/drivers/video/logo/logo.c
+@@ -21,97 +21,129 @@ static bool nologo;
+ module_param(nologo, bool, 0);
+ MODULE_PARM_DESC(nologo, "Disables startup logo");
+ 
+-/*
+- * Logos are located in the initdata, and will be freed in kernel_init.
+- * Use late_init to mark the logos as freed to prevent any further use.
+- */
+-
+-static bool logos_freed;
+-
+-static int __init fb_logo_late_init(void)
+-{
+-	logos_freed = true;
+-	return 0;
+-}
+-
+-late_initcall(fb_logo_late_init);
+-
+-/* logo's are marked __initdata. Use __ref to tell
+- * modpost that it is intended that this function uses data
+- * marked __initdata.
+- */
+-const struct linux_logo * __ref fb_find_logo(int depth)
+-{
+-	const struct linux_logo *logo = NULL;
+-
+-	if (nologo || logos_freed)
+-		return NULL;
+-
+-	if (depth >= 1) {
++static const struct linux_logo *logos[] __initconst = {
+ #ifdef CONFIG_LOGO_LINUX_MONO
+-		/* Generic Linux logo */
+-		logo = &logo_linux_mono;
++	/* Generic Linux logo */
++	&logo_linux_mono,
+ #endif
+ #ifdef CONFIG_LOGO_SUPERH_MONO
+-		/* SuperH Linux logo */
+-		logo = &logo_superh_mono;
++	/* SuperH Linux logo */
++	&logo_superh_mono,
+ #endif
+-	}
+-	
+-	if (depth >= 4) {
+ #ifdef CONFIG_LOGO_LINUX_VGA16
+-		/* Generic Linux logo */
+-		logo = &logo_linux_vga16;
++	/* Generic Linux logo */
++	&logo_linux_vga16,
+ #endif
+ #ifdef CONFIG_LOGO_BLACKFIN_VGA16
+-		/* Blackfin processor logo */
+-		logo = &logo_blackfin_vga16;
++	/* Blackfin processor logo */
++	&logo_blackfin_vga16,
+ #endif
+ #ifdef CONFIG_LOGO_SUPERH_VGA16
+-		/* SuperH Linux logo */
+-		logo = &logo_superh_vga16;
++	/* SuperH Linux logo */
++	&logo_superh_vga16,
+ #endif
+-	}
+-	
+-	if (depth >= 8) {
+ #ifdef CONFIG_LOGO_LINUX_CLUT224
+-		/* Generic Linux logo */
+-		logo = &logo_linux_clut224;
++	/* Generic Linux logo */
++	&logo_linux_clut224,
+ #endif
+ #ifdef CONFIG_LOGO_BLACKFIN_CLUT224
+-		/* Blackfin Linux logo */
+-		logo = &logo_blackfin_clut224;
++	/* Blackfin Linux logo */
++	&logo_blackfin_clut224,
+ #endif
+ #ifdef CONFIG_LOGO_DEC_CLUT224
+-		/* DEC Linux logo on MIPS/MIPS64 or ALPHA */
+-		logo = &logo_dec_clut224;
++	/* DEC Linux logo on MIPS/MIPS64 or ALPHA */
++	&logo_dec_clut224,
+ #endif
+-#ifdef CONFIG_LOGO_MAC_CLUT224
+-		/* Macintosh Linux logo on m68k */
+-		if (MACH_IS_MAC)
+-			logo = &logo_mac_clut224;
++#if defined(CONFIG_LOGO_MAC_CLUT224) && MACH_IS_MAC
++	/* Macintosh Linux logo on m68k */
++	&logo_mac_clut224,
+ #endif
+ #ifdef CONFIG_LOGO_PARISC_CLUT224
+-		/* PA-RISC Linux logo */
+-		logo = &logo_parisc_clut224;
++	/* PA-RISC Linux logo */
++	&logo_parisc_clut224,
+ #endif
+ #ifdef CONFIG_LOGO_SGI_CLUT224
+-		/* SGI Linux logo on MIPS/MIPS64 */
+-		logo = &logo_sgi_clut224;
++	/* SGI Linux logo on MIPS/MIPS64 and VISWS */
++	&logo_sgi_clut224,
+ #endif
+ #ifdef CONFIG_LOGO_SUN_CLUT224
+-		/* Sun Linux logo */
+-		logo = &logo_sun_clut224;
++	/* Sun Linux logo */
++	&logo_sun_clut224,
+ #endif
+ #ifdef CONFIG_LOGO_SUPERH_CLUT224
+-		/* SuperH Linux logo */
+-		logo = &logo_superh_clut224;
++	/* SuperH Linux logo */
++	&logo_superh_clut224,
+ #endif
+ #ifdef CONFIG_LOGO_M32R_CLUT224
+-		/* M32R Linux logo */
+-		logo = &logo_m32r_clut224;
++	/* M32R Linux logo */
++	&logo_m32r_clut224,
+ #endif
++	NULL
++};
++
++static bool type_depth_compatible(int type, int depth)
++{
++	switch (type) {
++	case LINUX_LOGO_MONO: return depth >= 1;
++	case LINUX_LOGO_VGA16: return depth >= 4;
++	case LINUX_LOGO_CLUT224: return depth >= 8;
++	default: return false;
+ 	}
++}
++
++#ifdef CONFIG_FB_LOGO_LARGEST
++static bool resolution_compatible(const struct linux_logo *logo,
++	unsigned int width, unsigned int height)
++{
++	if (width && height)
++		return (logo->width <= width) && (logo->height <= height);
++	else
++		return true;
++}
++
++static const struct linux_logo * __ref fb_logo_larger(
++		const struct linux_logo *logo1, const struct linux_logo *logo2)
++{
++	if (logo1->width*logo1->height > logo2->width*logo2->height)
++		return logo1;
++	else
++		return logo2;
++}
++#else
++#define fb_logo_larger(logo1, logo2)	(logo1)
++#define resolution_compatible(logo, w, h)	(true)
++#endif
++
++/* logo's are marked __initdata. Use __ref to tell
++ * modpost that it is intended that this function uses data
++ * marked __initdata.
++ */
++const struct linux_logo * __ref fb_find_logo_largest(int depth,
++	unsigned int width, unsigned int height)
++{
++	const struct linux_logo *logo = NULL;
++	const struct linux_logo **logos_itr;
++
++	if (nologo || system_state != SYSTEM_BOOTING)
++		return NULL;
++
++	for (logos_itr = logos; *logos_itr != NULL; logos_itr++)
++		if (type_depth_compatible((*logos_itr)->type, depth) &&
++		    resolution_compatible(*logos_itr, width, height)) {
++			if (logo)
++				logo = fb_logo_larger(logo, *logos_itr);
++			else
++				logo = *logos_itr;
++		}
++
+ 	return logo;
+ }
++#ifdef CONFIG_FB_LOGO_LARGEST
++EXPORT_SYMBOL_GPL(fb_find_logo_largest);
++#endif
++
++const struct linux_logo * __ref fb_find_logo(int depth)
++{
++	return fb_find_logo_largest(depth, 0, 0);
++}
+ EXPORT_SYMBOL_GPL(fb_find_logo);
+diff --git a/include/linux/linux_logo.h b/include/linux/linux_logo.h
+index ca5bd91d12e1..f497e97ebbdb 100644
+--- a/include/linux/linux_logo.h
++++ b/include/linux/linux_logo.h
+@@ -49,6 +49,10 @@ extern const struct linux_logo logo_m32r_clut224;
+ extern const struct linux_logo logo_spe_clut224;
+ 
+ extern const struct linux_logo *fb_find_logo(int depth);
++#ifdef CONFIG_FB_LOGO_LARGEST
++extern const struct linux_logo *fb_find_logo_largest(int depth,
++				unsigned int width, unsigned int height);
++#endif
+ #ifdef CONFIG_FB_LOGO_EXTRA
+ extern void fb_append_extra_logo(const struct linux_logo *logo,
+ 				 unsigned int n);
+-- 
+2.11.0
+
