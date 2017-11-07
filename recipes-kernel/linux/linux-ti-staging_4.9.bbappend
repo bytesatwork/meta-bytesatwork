@@ -33,9 +33,8 @@ SRC_URI += " \
 
 deltask compileconfigs
 
-DEFCONFIG = "bytepanel_defconfig"
 KERNEL_EXTRA_ARGS += "LOADADDR=${UBOOT_ENTRYPOINT}"
 
 kernel_do_compile_prepend() {
-	oe_runmake ${DEFCONFIG}
+	oe_runmake ${KERNEL_DEFCONFIG}
 }
