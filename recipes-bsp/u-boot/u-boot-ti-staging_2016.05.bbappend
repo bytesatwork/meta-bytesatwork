@@ -20,6 +20,7 @@ SRC_URI += " \
 	file://0016-add-M2-Rev4-with-EMMC-and-SPI-Nor.patch \
 	file://0017-EMIF-Set-OCP_Config-to-fix-LCD-pixel-shift.patch \
 	file://0018-am335x_m2-Add-timings-for-1GB-DDR3-MT41K512M16.patch \
+	file://0019-byteboard-Update-to-U-Boot-2016.05.patch \
 "
 
 do_deploy_append_bytepanel-emmc () {
