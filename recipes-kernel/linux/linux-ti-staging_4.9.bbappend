@@ -29,6 +29,8 @@ SRC_URI += " \
 	file://0023-ARM-dts-am43xx-Add-missing-pin-names.patch \
 	file://0024-ARM-byteboard_defconfig-Adapt-to-4.9.patch \
 	file://0025-ARM-dts-byteboard-Change-dts-to-dtsi.patch \
+	file://0026-ARM-byteboard_defconfig-Enable-support-for-ethernet-.patch \
+	file://0027-ARM-dts-byteboard-Improve-ethernet-performance.patch \
 "
 
 deltask compileconfigs
