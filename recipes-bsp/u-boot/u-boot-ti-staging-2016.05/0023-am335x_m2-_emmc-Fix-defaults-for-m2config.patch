@@ -1,0 +1,51 @@
+From 898707f42011436e8879e3ff657fa2c27b456b15 Mon Sep 17 00:00:00 2001
+From: Daniel Ammann <daniel.ammann@bytesatwork.ch>
+Date: Wed, 29 Nov 2017 11:40:43 +0100
+Subject: [PATCH 23/25] am335x_m2(_emmc): Fix defaults for m2config
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+m2 NAND is now Rev.02.
+m2 eMMC is Rev.04, Micron RAM and eMMC.
+
+Signed-off-by: Daniel Ammann <daniel.ammann@bytesatwork.ch>
+Reviewed-by: Oliver Stäbler <oliver.staebler@bytesatwork.ch>
+---
+ include/configs/am335x_m2.h      | 2 +-
+ include/configs/am335x_m2_emmc.h | 6 +++---
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/include/configs/am335x_m2.h b/include/configs/am335x_m2.h
+index 926a68a6b9..8f97639f8e 100644
+--- a/include/configs/am335x_m2.h
++++ b/include/configs/am335x_m2.h
+@@ -161,7 +161,7 @@
+ #define CONFIG_CMD_M2CONFIG
+ #define CONFIG_M2CONFIG_EEPROM
+ #define CONFIG_M2CONFIG_BUILTIN
+-#define CONFIG_M2CONFIG_BUILTIN_PCB	M2_PCB_REV_00
++#define CONFIG_M2CONFIG_BUILTIN_PCB	M2_PCB_REV_02
+ #define CONFIG_M2CONFIG_BUILTIN_RAM	M2_RAM_K4B2G1646EBIH9
+ #define CONFIG_M2CONFIG_BUILTIN_FLASH	M2_NAND_2GBIT
+ 
+diff --git a/include/configs/am335x_m2_emmc.h b/include/configs/am335x_m2_emmc.h
+index f7cf66f952..1c0e0fc392 100644
+--- a/include/configs/am335x_m2_emmc.h
++++ b/include/configs/am335x_m2_emmc.h
+@@ -117,9 +117,9 @@
+ #define CONFIG_CMD_M2CONFIG
+ #define CONFIG_M2CONFIG_EEPROM
+ #define CONFIG_M2CONFIG_BUILTIN
+-#define CONFIG_M2CONFIG_BUILTIN_PCB	M2_PCB_REV_00
+-#define CONFIG_M2CONFIG_BUILTIN_RAM	M2_RAM_K4B2G1646EBIH9
+-#define CONFIG_M2CONFIG_BUILTIN_FLASH	M2_NAND_2GBIT
++#define CONFIG_M2CONFIG_BUILTIN_PCB	M2_PCB_REV_04
++#define CONFIG_M2CONFIG_BUILTIN_RAM	M2_RAM_MT41K512M16HA107
++#define CONFIG_M2CONFIG_BUILTIN_FLASH	M2_EMMC_4GB
+ 
+ /* NS16550 Configuration */
+ #define CONFIG_SYS_NS16550_COM1		0x44e09000
+-- 
+2.11.0
+

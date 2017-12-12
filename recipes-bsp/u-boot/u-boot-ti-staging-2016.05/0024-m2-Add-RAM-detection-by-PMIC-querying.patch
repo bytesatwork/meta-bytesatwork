@@ -1,0 +1,102 @@
+From da1a44e4ca36a3dde2fad8fc9d21f6bc780d9036 Mon Sep 17 00:00:00 2001
+From: Daniel Ammann <daniel.ammann@bytesatwork.ch>
+Date: Mon, 4 Dec 2017 09:30:52 +0100
+Subject: [PATCH 24/25] m2: Add RAM detection by PMIC querying
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+If the EEPROM RAM configuration is empty or invalid, read the PMIC
+voltage level (DDR2 is 1.8V, DDR3 is 1.5V) via I2C and deduce a basic
+RAM configuration.  If this fails as well, fall back to the built-in
+default.
+
+Signed-off-by: Daniel Ammann <daniel.ammann@bytesatwork.ch>
+Reviewed-by: Oliver Stäbler <oliver.staebler@bytesatwork.ch>
+---
+ board/bytesatwork/am335x/m2config/m2config_get.c | 26 +++++++++++++++++++-----
+ board/bytesatwork/am335x/m2config/m2config_get.h |  2 +-
+ board/bytesatwork/am335x/ram.c                   |  9 ++------
+ 3 files changed, 24 insertions(+), 13 deletions(-)
+
+diff --git a/board/bytesatwork/am335x/m2config/m2config_get.c b/board/bytesatwork/am335x/m2config/m2config_get.c
+index 2907a19576..3f405fca75 100644
+--- a/board/bytesatwork/am335x/m2config/m2config_get.c
++++ b/board/bytesatwork/am335x/m2config/m2config_get.c
+@@ -5,18 +5,34 @@
+  * SPDX-License-Identifier:	GPL-2.0+
+  */
+ 
++#include <asm/arch/ddr_defs.h>
++#include <i2c.h>
+ #include "m2config_get.h"
+ 
+ #include "m2config_builtin.h"
+ #include "m2config_eeprom.h"
+ 
+-int m2config_get(struct m2config *config)
++#define PMIC_ADDRESS 0x2D
++
++void m2config_get(struct m2config *config)
+ {
++	uint8_t reg = 0;
++
+ 	if (m2config_eeprom_read(config) == 0)
+-		return 0;
++		return;
+ 
+-	if (m2config_builtin(config) == 0)
+-		return 0;
++	if (i2c_read(PMIC_ADDRESS, 0x20, 1, &reg, 1) != 0) {
++		printf("Error: PMIC read failed\n");
++	}
+ 
+-	return -1;
++	if (reg == 0x05) {
++		config->ram = M2_RAM_MT47H128M16RT25E;	/* set DDR2 */
++		printf("DDR2 detected\n");
++	} else if (reg == 0x01) {
++		config->ram = M2_RAM_K4B2G1646EBIH9;	/* set legacy DDR3 */
++		printf("DDR3 detected\n");
++	} else {
++		config->ram = M2_RAM_K4B2G1646EBIH9;	/* set default to legacy DDR3 */
++		printf("Error: no RAM configuration found, trying fallback configuration %u\n", config->ram);
++	}
+ }
+diff --git a/board/bytesatwork/am335x/m2config/m2config_get.h b/board/bytesatwork/am335x/m2config/m2config_get.h
+index f4eb56bf75..56fcfd417e 100644
+--- a/board/bytesatwork/am335x/m2config/m2config_get.h
++++ b/board/bytesatwork/am335x/m2config/m2config_get.h
+@@ -10,6 +10,6 @@
+ 
+ #include "m2config.h"
+ 
+-int m2config_get(struct m2config *config);
++void m2config_get(struct m2config *config);
+ 
+ #endif
+diff --git a/board/bytesatwork/am335x/ram.c b/board/bytesatwork/am335x/ram.c
+index d3665d4adf..e2e9e742f6 100644
+--- a/board/bytesatwork/am335x/ram.c
++++ b/board/bytesatwork/am335x/ram.c
+@@ -323,15 +323,10 @@ static const struct ram_config *findRam(m2config_ram_t config)
+ static const struct ram_config *getRam(void)
+ {
+ 	const struct ram_config *ram = NULL;
+-
+ 	struct m2config config;
+-	if (m2config_get(&config) == 0)
+-		ram = findRam(config.ram);
+ 
+-	if (ram == NULL) {
+-		ram = &ram_init_map[1]; /* set default to legacy DDR3 */
+-		printf("Error: no RAM configuration found, trying fallback configuration %u\n", ram->config);
+-	}
++	m2config_get(&config);
++	ram = findRam(config.ram);
+ 
+ 	return ram;
+ }
+-- 
+2.11.0
+

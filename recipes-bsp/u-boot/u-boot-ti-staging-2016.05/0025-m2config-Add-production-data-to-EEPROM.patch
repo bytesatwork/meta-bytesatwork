@@ -1,0 +1,314 @@
+From 6408b274a1851a7bd3c0bb06ab541f7c0c78a1a9 Mon Sep 17 00:00:00 2001
+From: Daniel Ammann <daniel.ammann@bytesatwork.ch>
+Date: Mon, 4 Dec 2017 12:00:53 +0100
+Subject: [PATCH 25/25] m2config: Add production data to EEPROM
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Add an additional data block, structured in a similar way as the
+original m2config data.  The following data is stored in the EEPROM:
+- Article number
+- Lot
+- Lot sequence number
+- Production date
+- Flash date
+- Flash user
+
+The m2config command (PCB, RAM, flash) has the above 6 new parameters
+that are mandatory.  The original data block is backwards compatible.
+
+Signed-off-by: Daniel Ammann <daniel.ammann@bytesatwork.ch>
+Reviewed-by: Oliver Stäbler <oliver.staebler@bytesatwork.ch>
+---
+ board/bytesatwork/am335x/m2config/README           | 19 ++++-
+ board/bytesatwork/am335x/m2config/cmd_m2config.c   | 32 ++++++--
+ board/bytesatwork/am335x/m2config/m2config.h       |  7 ++
+ .../bytesatwork/am335x/m2config/m2config_eeprom.c  | 95 ++++++++++++++++++----
+ 4 files changed, 127 insertions(+), 26 deletions(-)
+
+diff --git a/board/bytesatwork/am335x/m2config/README b/board/bytesatwork/am335x/m2config/README
+index fa20ad733c..d6477d4fb3 100644
+--- a/board/bytesatwork/am335x/m2config/README
++++ b/board/bytesatwork/am335x/m2config/README
+@@ -21,7 +21,6 @@ At least one of CONFIG_M2CONFIG_EEPROM or CONFIG_M2CONFIG_BUILTIN has to be
+ defined.
+ 
+ 
+-
+ EEPROM format
+ 
+ Byte order is the native byte order of the CPU. The format is:
+@@ -35,3 +34,21 @@ Bytes  Usage
+   4    CRC
+ 
+ Magic is 0x6268. CRC is the native u-boot crc32.
++
++
++Extended data EEPROM format
++
++Byte order is the native byte order of the CPU. The format is:
++
++Bytes  Usage
++  2    Magic ext.
++  2    length
++  4    CRC
++ 10    Article number
++  4    Lot
++  1    Lot sequence number
++ 12    Production date
++  6    Flash date
++  6    Flash user
++
++Magic is 0x6235. CRC is the native u-boot crc32.
+diff --git a/board/bytesatwork/am335x/m2config/cmd_m2config.c b/board/bytesatwork/am335x/m2config/cmd_m2config.c
+index 8a4b98fe4d..6b15cd0539 100644
+--- a/board/bytesatwork/am335x/m2config/cmd_m2config.c
++++ b/board/bytesatwork/am335x/m2config/cmd_m2config.c
+@@ -16,6 +16,15 @@ static void print_config(const struct m2config *config)
+ 	printf("PCB:   %u (%s)\n", config->pcb, m2config_get_pcb_name(config->pcb));
+ 	printf("RAM:   %u (%s)\n", config->ram, m2config_get_ram_name(config->ram));
+ 	printf("Flash: %u (%s)\n", config->flash, m2config_get_flash_name(config->flash));
++
++	if (config->ext_avail == 1) {
++		printf("\n");
++		printf("Article number:  %u\n", config->artno);
++		printf("Lot:             %u.%u\n", config->lot, config->lotseq);
++		printf("Production date: %s\n", config->proddate);
++		printf("Flash date:      %s\n", config->flashdate);
++		printf("Flash user:      %s\n", config->flashuser);
++	}
+ }
+ 
+ #if defined(CONFIG_M2CONFIG_BUILTIN)
+@@ -40,13 +49,14 @@ static enum command_ret_t cmd_builtin(int argc, char * const argv[])
+ #if defined(CONFIG_M2CONFIG_EEPROM)
+ static enum command_ret_t cmd_read(int argc, char * const argv[])
+ {
++	struct m2config config;
++	int ret;
++
+ 	if (argc != 0)
+ 		return CMD_RET_USAGE;
+ 
+-	struct m2config config;
+-
+-	if (m2config_eeprom_read(&config) != 0)
+-		printf ("no configuration in eeprom\n");
++	if ((ret = m2config_eeprom_read(&config)) != 0)
++		printf ("no configuration in eeprom: %i\n", ret);
+ 	else
+ 		print_config(&config);
+ 
+@@ -55,14 +65,22 @@ static enum command_ret_t cmd_read(int argc, char * const argv[])
+ 
+ static enum command_ret_t cmd_write(int argc, char * const argv[])
+ {
+-	if (argc != 3)
++	struct m2config config;
++
++	if (argc != 9)
+ 		return CMD_RET_USAGE;
+ 
+-	struct m2config config;
+ 	config.pcb = simple_strtoul(argv[0], NULL, 10);
+ 	config.ram = simple_strtoul(argv[1], NULL, 10);
+ 	config.flash = simple_strtoul(argv[2], NULL, 10);
+ 
++	config.artno = simple_strtoul(argv[3], NULL, 10);
++	config.lot = simple_strtoul(argv[4], NULL, 10);
++	config.lotseq = simple_strtoul(argv[5], NULL, 10);
++	strlcpy(config.proddate, argv[6], sizeof(config.proddate));
++	strlcpy(config.flashdate, argv[7], sizeof(config.flashdate));
++	strlcpy(config.flashuser, argv[8], sizeof(config.flashuser));
++
+ 	if (m2config_eeprom_write(&config) != 0) {
+ 		printf ("could not write to EEPROM\n");
+ 		return CMD_RET_FAILURE;
+@@ -172,7 +190,7 @@ enum command_ret_t do_m2config (cmd_tbl_t * cmdtp, int flag, int argc, char * co
+ }
+ 
+ U_BOOT_CMD(
+-	m2config, 5, 0, do_m2config,
++	m2config, 11, 0, do_m2config,
+ 	"perform m2 configuration",
+ 	"- list known configuration values\n"
+ #if defined(CONFIG_M2CONFIG_BUILTIN)
+diff --git a/board/bytesatwork/am335x/m2config/m2config.h b/board/bytesatwork/am335x/m2config/m2config.h
+index e70fd8b02c..95916b6233 100644
+--- a/board/bytesatwork/am335x/m2config/m2config.h
++++ b/board/bytesatwork/am335x/m2config/m2config.h
+@@ -48,6 +48,13 @@ struct m2config {
+ 	m2config_pcb_t		pcb;
+ 	m2config_ram_t		ram;
+ 	m2config_flash_t	flash;
++	bool			ext_avail;
++	uint32_t		artno;
++	uint32_t		lot;
++	uint8_t			lotseq;
++	char			proddate[12];
++	char			flashdate[6];
++	char			flashuser[6];
+ };
+ 
+ struct m2config_name_pair {
+diff --git a/board/bytesatwork/am335x/m2config/m2config_eeprom.c b/board/bytesatwork/am335x/m2config/m2config_eeprom.c
+index 75701c75eb..bf31f770e2 100644
+--- a/board/bytesatwork/am335x/m2config/m2config_eeprom.c
++++ b/board/bytesatwork/am335x/m2config/m2config_eeprom.c
+@@ -14,6 +14,8 @@
+ 
+ #define EEPROM_ADDRESS	0x50
+ #define MAGIC  0x6268
++#define EEPROM_EXT_OFFSET 0x14
++#define MAGIC_EXT 0x6235
+ 
+ typedef uint8_t address_t; //TODO: according to the datasheet, this should be 2 bytes
+ 
+@@ -30,6 +32,16 @@ struct eeprom_content
+ 	uint32_t	flash;
+ } __attribute__ ((packed));
+ 
++struct eeprom_content_ext
++{
++	uint32_t	artno;
++	uint32_t	lot;
++	uint8_t		lotseq;
++	char		proddate[12];
++	char		flashdate[6];
++	char		flashuser[6];
++} __attribute__ ((packed));
++
+ struct eeprom_data
+ {
+ 	struct eeprom_header	header;
+@@ -37,43 +49,78 @@ struct eeprom_data
+ 	uint32_t		crc;
+ } __attribute__ ((packed));
+ 
+-struct eeprom_write_frame
++struct eeprom_data_ext
+ {
+-	address_t            address;
+-	struct eeprom_data   content;
++	struct eeprom_header		header;
++	uint32_t			crc;
++	struct eeprom_content_ext	content;
+ } __attribute__ ((packed));
+ 
++struct eeprom_write_frame
++{
++	address_t		address;
++	struct eeprom_data	content;
++	struct eeprom_data_ext	content_ext;
++} __attribute__ ((packed));
+ 
+-static uint8_t crc(const struct eeprom_content *config)
++struct eeprom_read_frame
+ {
+-	return crc32(0, (uint8_t*)config, sizeof(*config));
+-}
++	struct eeprom_data	content;
++	struct eeprom_data_ext	content_ext;
++} __attribute__ ((packed));
+ 
+ int m2config_eeprom_read(struct m2config *config)
+ {
+ 	address_t address = 0;
+-	struct eeprom_data   content;
++	struct eeprom_read_frame frame;
+ 
+-	if (i2c_write(EEPROM_ADDRESS, 0, 1, (u8 *)&address, sizeof(address)) != 0)
++	if (i2c_write(EEPROM_ADDRESS, 0, 1, (uint8_t*) &address, sizeof(address)) != 0)
+ 		return -2;
+ 
+ 	udelay(5);
+ 
+-	if (i2c_read(EEPROM_ADDRESS, 0, 1, (u8 *)&content, sizeof(content)) != 0)
++	if (i2c_read(EEPROM_ADDRESS, 0, 1, (uint8_t*) &frame, sizeof(frame)) != 0)
+ 		return -3;
+ 
+-	if (content.header.magic != MAGIC)
++	if (frame.content.header.magic != MAGIC)
+ 		return -4;
+ 
+-	if (content.header.length != sizeof(content.content))
++	if (frame.content.header.length != sizeof(frame.content.content))
+ 		return -5;
+ 
+-	if (content.crc != crc(&content.content))
++	/* Cast crc32 value to uint8_t because of legacy code */
++	if (frame.content.crc != (uint8_t) crc32(0, (uint8_t*) &frame.content.content, sizeof(frame.content.content)))
+ 		return -6;
+ 
+-	config->pcb    = content.content.pcb;
+-	config->ram    = content.content.ram;
+-	config->flash  = content.content.flash;
++	config->pcb    = frame.content.content.pcb;
++	config->ram    = frame.content.content.ram;
++	config->flash  = frame.content.content.flash;
++
++	config->ext_avail = 0;
++	if (frame.content_ext.header.magic != MAGIC_EXT) {
++		printf("ext magic wrong\n");
++		return 0;
++	}
++
++	if (frame.content_ext.header.length != sizeof(frame.content_ext.content)) {
++		printf("ext len wrong\n");
++		return 0;
++	}
++
++	if (frame.content_ext.crc != crc32(0, (uint8_t*) &frame.content_ext.content, sizeof(frame.content_ext.content))) {
++		printf("ext crc wrong\n");
++		return 0;
++	}
++
++	config->artno = frame.content_ext.content.artno;
++	config->lot = frame.content_ext.content.lot;
++	config->lotseq = frame.content_ext.content.lotseq;
++
++	strlcpy(config->proddate, frame.content_ext.content.proddate, sizeof(config->proddate));
++	strlcpy(config->flashdate, frame.content_ext.content.flashdate, sizeof(config->flashdate));
++	strlcpy(config->flashuser, frame.content_ext.content.flashuser, sizeof(config->flashuser));
++
++	config->ext_avail = 1;
+ 
+ 	return 0;
+ }
+@@ -90,9 +137,21 @@ int m2config_eeprom_write(struct m2config *config)
+ 	frame.content.content.pcb = config->pcb;
+ 	frame.content.content.ram = config->ram;
+ 	frame.content.content.flash = config->flash;
+-	frame.content.crc = crc(&frame.content.content);
++	/* Cast crc32 value to uint8_t because of legacy code */
++	frame.content.crc = (uint8_t) crc32(0, (const uint8_t*)&frame.content.content, sizeof(frame.content.content));
++
++	frame.content_ext.header.magic = MAGIC_EXT;
++	frame.content_ext.header.length = sizeof(frame.content_ext.content);
++
++	frame.content_ext.content.artno = config->artno;
++	frame.content_ext.content.lot = config->lot;
++	frame.content_ext.content.lotseq = config->lotseq;
++	strlcpy(frame.content_ext.content.proddate, config->proddate, sizeof(frame.content_ext.content.proddate));
++	strlcpy(frame.content_ext.content.flashdate, config->flashdate, sizeof(frame.content_ext.content.flashdate));
++	strlcpy(frame.content_ext.content.flashuser, config->flashuser, sizeof(frame.content_ext.content.flashuser));
++	frame.content_ext.crc = crc32(0, (uint8_t*) &frame.content_ext.content, sizeof(frame.content_ext.content));
+ 
+-	if (i2c_write(EEPROM_ADDRESS, 0, 1, (u8 *)&frame, sizeof(frame)) != 0)
++	if (i2c_write(EEPROM_ADDRESS, 0, 1, (uint8_t*) &frame, sizeof(frame)) != 0)
+ 		return -7;
+ 
+ 	return 0;
+@@ -105,7 +164,7 @@ int m2config_eeprom_erase(void)
+ 	memset(&frame, 0xff, sizeof(frame));
+ 	frame.address = 0;
+ 
+-	if (i2c_write(EEPROM_ADDRESS, 0, 1, (u8 *)&frame, sizeof(frame)) != 0)
++	if (i2c_write(EEPROM_ADDRESS, 0, 1, (uint8_t*) &frame, sizeof(frame)) != 0)
+ 		return -8;
+ 
+ 	return 0;
+-- 
+2.11.0
+

@@ -21,6 +21,12 @@ SRC_URI += " \
 	file://0017-EMIF-Set-OCP_Config-to-fix-LCD-pixel-shift.patch \
 	file://0018-am335x_m2-Add-timings-for-1GB-DDR3-MT41K512M16.patch \
 	file://0019-byteboard-Update-to-U-Boot-2016.05.patch \
+	file://0020-am335x_m2_emmc-Fix-booting-from-eMMC.patch \
+	file://0021-configs-Minimize-all-m2-and-m3-defconfigs.patch \
+	file://0022-am335x_m2-Silence-distracting-compilation-warnings.patch \
+	file://0023-am335x_m2-_emmc-Fix-defaults-for-m2config.patch \
+	file://0024-m2-Add-RAM-detection-by-PMIC-querying.patch \
+	file://0025-m2config-Add-production-data-to-EEPROM.patch \
 "
 
 do_deploy_append_bytepanel-emmc () {
