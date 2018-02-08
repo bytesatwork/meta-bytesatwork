@@ -31,6 +31,8 @@ SRC_URI += " \
 	file://0025-ARM-dts-byteboard-Change-dts-to-dtsi.patch \
 	file://0026-ARM-byteboard_defconfig-Enable-support-for-ethernet-.patch \
 	file://0027-ARM-dts-byteboard-Improve-ethernet-performance.patch \
+	file://0028-video-logo-Add-bytesatwork-480x272-logo.patch \
+	file://0029-video-logo-Update-bytes-at-work-logos-for-the-new-de.patch \
 "
 
 deltask compileconfigs
