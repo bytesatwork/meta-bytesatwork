@@ -1,0 +1,65 @@
+From 1409a7a374ba4c4cb405b9f07a9e99c1de8bce35 Mon Sep 17 00:00:00 2001
+From: Daniel Ammann <daniel.ammann@bytesatwork.ch>
+Date: Wed, 7 Feb 2018 17:26:36 +0100
+Subject: [PATCH] board: bytesatwork: m2: Tweak m2 muxing
+
+Mux mmc1 only for m2 eMMC variants since it conflicts with the nand
+variants. Explicitly mux nand pins for m2 NAND variants.
+---
+ board/bytesatwork/am335x/mux.c | 27 ++++++++++++++++++++++++++-
+ 1 file changed, 26 insertions(+), 1 deletion(-)
+
+diff --git a/board/bytesatwork/am335x/mux.c b/board/bytesatwork/am335x/mux.c
+index 6915e97012..62ddd71f96 100644
+--- a/board/bytesatwork/am335x/mux.c
++++ b/board/bytesatwork/am335x/mux.c
+@@ -71,6 +71,7 @@ static struct module_pin_mux mmc0_pin_mux[] = {
+ 	{-1},
+ };
+ 
++#ifdef CONFIG_TARGET_AM335X_M2_EMMC
+ static struct module_pin_mux mmc1_pin_mux[] = {
+ 	{OFFSET(gpmc_ad7), (MODE(1) | RXACTIVE | PULLUP_EN)},	/* MMC1_DAT7 */
+ 	{OFFSET(gpmc_ad6), (MODE(1) | RXACTIVE | PULLUP_EN)},	/* MMC1_DAT6 */
+@@ -84,6 +85,26 @@ static struct module_pin_mux mmc1_pin_mux[] = {
+ 	{OFFSET(gpmc_csn2), (MODE(2) | RXACTIVE | PULLUP_EN)},	/* MMC1_CMD */
+ 	{-1},
+ };
++#else
++static struct module_pin_mux nand_pin_mux[] = {
++	{OFFSET(gpmc_ad0), (MODE(0) | RXACTIVE | PULLUP_EN)},	/* GPMC_AD0 */
++	{OFFSET(gpmc_ad1), (MODE(0) | RXACTIVE | PULLUP_EN)},	/* GPMC_AD1 */
++	{OFFSET(gpmc_ad2), (MODE(0) | RXACTIVE | PULLUP_EN)},	/* GPMC_AD2 */
++	{OFFSET(gpmc_ad3), (MODE(0) | RXACTIVE | PULLUP_EN)},	/* GPMC_AD3 */
++	{OFFSET(gpmc_ad4), (MODE(0) | RXACTIVE | PULLUP_EN)},	/* GPMC_AD4 */
++	{OFFSET(gpmc_ad5), (MODE(0) | RXACTIVE | PULLUP_EN)},	/* GPMC_AD5 */
++	{OFFSET(gpmc_ad6), (MODE(0) | RXACTIVE | PULLUP_EN)},	/* GPMC_AD6 */
++	{OFFSET(gpmc_ad7), (MODE(0) | RXACTIVE | PULLUP_EN)},	/* GPMC_AD7 */
++	{OFFSET(gpmc_wpn), (MODE(7) | RXACTIVE | PULLUP_EN)},	/* GPMC_WPN */
++	{OFFSET(gpmc_csn0), (MODE(0))},				/* GPMC_CSN0 */
++	{OFFSET(gpmc_advn_ale), (MODE(0))},			/* GPMC_ADVN_ALE */
++	{OFFSET(gpmc_be0n_cle), (MODE(0))},			/* GPMC_BEN0_CLE */
++	{OFFSET(gpmc_wen), (MODE(0))},				/* GPMC_WEN */
++	{OFFSET(gpmc_oen_ren), (MODE(0))},			/* GPMC_OEN_REN */
++	{OFFSET(gpmc_wait0), (MODE(0) | RXACTIVE | PULLUP_EN)},	/* GPMC_WAIT0 */
++	{-1},
++};
++#endif
+ 
+ static struct module_pin_mux i2c0_pin_mux[] = {
+ 	{OFFSET(i2c0_sda), (MODE(0) | RXACTIVE |
+@@ -161,6 +182,10 @@ void enable_board_pin_mux(void)
+ {
+ 	configure_module_pin_mux(mii1_pin_mux);
+ 	configure_module_pin_mux(mmc0_pin_mux);
+-	configure_module_pin_mux(mmc1_pin_mux);
+ 	configure_module_pin_mux(spi0_pin_mux);
++#ifdef CONFIG_TARGET_AM335X_M2_EMMC
++	configure_module_pin_mux(mmc1_pin_mux);
++#else
++	configure_module_pin_mux(nand_pin_mux);
++#endif
+ }
+-- 
+2.11.0
+

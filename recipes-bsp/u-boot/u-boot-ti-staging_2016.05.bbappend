@@ -27,6 +27,7 @@ SRC_URI += " \
 	file://0023-am335x_m2-_emmc-Fix-defaults-for-m2config.patch \
 	file://0024-m2-Add-RAM-detection-by-PMIC-querying.patch \
 	file://0025-m2config-Add-production-data-to-EEPROM.patch \
+	file://0026-board-bytesatwork-m2-Tweak-m2-muxing.patch \
 "
 
 do_deploy_append_bytepanel-emmc () {
