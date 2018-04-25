@@ -13,12 +13,12 @@ This layer depends on:
 
 	URI: git://git.yoctoproject.org/meta-ti
 	layer: meta-ti
-	branch: rocko
-	commit: 1e2e863ae128972bde5a091de426cbee6d165ef0
+	branch: master
+	commit: b42044aaf51323d6948e6837884327b182ef9022
 
 	URI: git://git.openembedded.org/meta-openembedded
 	layers: meta-oe, meta-networking, meta-python
-	branch: rocko
+	branch: sumo
 
 
 BSP
