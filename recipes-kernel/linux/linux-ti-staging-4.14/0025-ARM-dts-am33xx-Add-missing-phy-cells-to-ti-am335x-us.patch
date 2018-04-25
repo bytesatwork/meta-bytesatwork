@@ -1,0 +1,79 @@
+From 5ab8481bb21363bbaa2e3a1b05185349f2150f73 Mon Sep 17 00:00:00 2001
+From: Rob Herring <robh@kernel.org>
+Date: Thu, 9 Nov 2017 16:26:14 -0600
+Subject: [PATCH] ARM: dts: am33xx: Add missing #phy-cells to ti,am335x-usb-phy
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+"ti,am335x-usb-phy" is using the phy binding, but is missing #phy-cells
+property. Fixes the following warning in TI dts files:
+
+Warning (phys_property): Missing property '#phy-cells' in node ...
+
+Signed-off-by: Rob Herring <robh@kernel.org>
+Cc: "Benoît Cousson" <bcousson@baylibre.com>
+Cc: Tony Lindgren <tony@atomide.com>
+Cc: linux-omap@vger.kernel.org
+Signed-off-by: Tony Lindgren <tony@atomide.com>
+---
+ Documentation/devicetree/bindings/usb/am33xx-usb.txt | 2 ++
+ arch/arm/boot/dts/am33xx.dtsi                        | 2 ++
+ arch/arm/boot/dts/dm814x.dtsi                        | 1 +
+ 3 files changed, 5 insertions(+)
+
+diff --git a/Documentation/devicetree/bindings/usb/am33xx-usb.txt b/Documentation/devicetree/bindings/usb/am33xx-usb.txt
+index 7a33f22c815a..7a198a30408a 100644
+--- a/Documentation/devicetree/bindings/usb/am33xx-usb.txt
++++ b/Documentation/devicetree/bindings/usb/am33xx-usb.txt
+@@ -95,6 +95,7 @@ usb: usb@47400000 {
+ 		reg = <0x47401300 0x100>;
+ 		reg-names = "phy";
+ 		ti,ctrl_mod = <&ctrl_mod>;
++		#phy-cells = <0>;
+ 	};
+ 
+ 	usb0: usb@47401000 {
+@@ -141,6 +142,7 @@ usb: usb@47400000 {
+ 		reg = <0x47401b00 0x100>;
+ 		reg-names = "phy";
+ 		ti,ctrl_mod = <&ctrl_mod>;
++		#phy-cells = <0>;
+ 	};
+ 
+ 	usb1: usb@47401800 {
+diff --git a/arch/arm/boot/dts/am33xx.dtsi b/arch/arm/boot/dts/am33xx.dtsi
+index a048086d10b8..3dd540a5a64e 100644
+--- a/arch/arm/boot/dts/am33xx.dtsi
++++ b/arch/arm/boot/dts/am33xx.dtsi
+@@ -649,6 +649,7 @@
+ 				reg-names = "phy";
+ 				status = "disabled";
+ 				ti,ctrl_mod = <&usb_ctrl_mod>;
++				#phy-cells = <0>;
+ 			};
+ 
+ 			usb0: usb@47401000 {
+@@ -697,6 +698,7 @@
+ 				reg-names = "phy";
+ 				status = "disabled";
+ 				ti,ctrl_mod = <&usb_ctrl_mod>;
++				#phy-cells = <0>;
+ 			};
+ 
+ 			usb1: usb@47401800 {
+diff --git a/arch/arm/boot/dts/dm814x.dtsi b/arch/arm/boot/dts/dm814x.dtsi
+index 9708157f5daf..b7a11c1168d1 100644
+--- a/arch/arm/boot/dts/dm814x.dtsi
++++ b/arch/arm/boot/dts/dm814x.dtsi
+@@ -75,6 +75,7 @@
+ 				reg = <0x47401300 0x100>;
+ 				reg-names = "phy";
+ 				ti,ctrl_mod = <&usb_ctrl_mod>;
++				#phy-cells = <0>;
+ 			};
+ 
+ 			usb0: usb@47401000 {
+-- 
+2.11.0
+
