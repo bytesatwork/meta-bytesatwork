@@ -33,6 +33,7 @@ SRC_URI += " \
 	file://0027-ARM-dts-byteboard-Improve-ethernet-performance.patch \
 	file://0028-video-logo-Add-bytesatwork-480x272-logo.patch \
 	file://0029-video-logo-Update-bytes-at-work-logos-for-the-new-de.patch \
+	file://0030-mtd-spi-nor-Add-support-for-W25Q128JV.patch \
 "
 
 deltask compileconfigs
