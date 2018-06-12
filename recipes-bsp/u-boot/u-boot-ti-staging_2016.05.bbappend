@@ -31,6 +31,7 @@ SRC_URI += " \
 	file://0027-m2config-Add-support-for-storing-mac-address-and-uid.patch \
 	file://0028-am335x_m2-Enable-meminfo-command.patch \
 	file://0029-cmd-cpuinfo-Add-a-basic-command-for-showing-cpu-info.patch \
+	file://0030-sf-params-Add-support-for-W25Q128JV.patch \
 "
 
 do_deploy_append_bytepanel-emmc () {

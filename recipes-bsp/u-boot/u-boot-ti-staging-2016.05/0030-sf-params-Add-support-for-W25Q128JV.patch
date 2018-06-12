@@ -1,0 +1,24 @@
+From ccfa0d69001ffd2410488990549ea4ccf277e241 Mon Sep 17 00:00:00 2001
+From: Daniel Ammann <daniel.ammann@bytesatwork.ch>
+Date: Tue, 5 Jun 2018 16:47:33 +0200
+Subject: [PATCH] sf: params: Add support for W25Q128JV
+
+---
+ drivers/mtd/spi/sf_params.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/mtd/spi/sf_params.c b/drivers/mtd/spi/sf_params.c
+index aeabaa64f0..a4f41602b6 100644
+--- a/drivers/mtd/spi/sf_params.c
++++ b/drivers/mtd/spi/sf_params.c
+@@ -123,6 +123,7 @@ const struct spi_flash_params spi_flash_params_table[] = {
+ 	{"W25Q32BV",	   0xef4016, 0x0,	64 * 1024,    64, RD_FULL,	    WR_QPP | SECT_4K},
+ 	{"W25Q64CV",	   0xef4017, 0x0,	64 * 1024,   128, RD_FULL,	    WR_QPP | SECT_4K},
+ 	{"W25Q128BV",	   0xef4018, 0x0,	64 * 1024,   256, RD_FULL,	    WR_QPP | SECT_4K},
++	{"W25Q128JV",	   0xef7018, 0x0,	64 * 1024,   256, RD_FULL,	    WR_QPP | SECT_4K},
+ 	{"W25Q256",	   0xef4019, 0x0,	64 * 1024,   512, RD_FULL,	    WR_QPP | SECT_4K},
+ 	{"W25Q80BW",	   0xef5014, 0x0,	64 * 1024,    16, RD_FULL,	    WR_QPP | SECT_4K},
+ 	{"W25Q16DW",	   0xef6015, 0x0,	64 * 1024,    32, RD_FULL,	    WR_QPP | SECT_4K},
+-- 
+2.11.0
+
