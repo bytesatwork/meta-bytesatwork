@@ -14,7 +14,7 @@ This layer depends on:
 	URI: git://git.yoctoproject.org/meta-ti
 	layer: meta-ti
 	branch: master
-	commit: b42044aaf51323d6948e6837884327b182ef9022
+	commit: eacaf4cf524d3ba8f14cd2b124e52793ef24ec65
 
 	URI: git://git.openembedded.org/meta-openembedded
 	layers: meta-oe, meta-networking, meta-python
