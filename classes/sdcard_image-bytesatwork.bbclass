@@ -140,11 +140,11 @@ IMAGE_CMD_bytesatwork-sdimg () {
 EOF
 # do not indent above line!
 
-	local devtree="${DEPLOY_DIR_IMAGE}/uImage-${dtfile}"
+	local devtree="${DEPLOY_DIR_IMAGE}/${dtfile}"
 	mcopy -i ${WORKDIR}/${IMAGE_VFAT_NAME} -s ${devtree} ::devtree.dtb
 	# also copy all the "original" device trees
 	for i in ${SDIMG_DEVICETREE}; do
-		local devtree="${DEPLOY_DIR_IMAGE}/uImage-${i}"
+		local devtree="${DEPLOY_DIR_IMAGE}/${i}"
 		mcopy -i ${WORKDIR}/${IMAGE_VFAT_NAME} -s ${devtree} ::$i
 	done
 
