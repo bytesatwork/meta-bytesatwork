@@ -22,6 +22,7 @@ RDEPENDS_${PN} = "\
 	file \
 	gdb \
 	gdbserver \
+	haveged \
 	htop \
 	iproute2 \
 	libsocketcan \
