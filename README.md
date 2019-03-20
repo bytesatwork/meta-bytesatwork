@@ -14,11 +14,11 @@ This layer depends on:
 	URI: git://git.yoctoproject.org/meta-ti
 	layer: meta-ti
 	branch: master
-	commit: eacaf4cf524d3ba8f14cd2b124e52793ef24ec65
+	commit: 2f28749040692b2267cb72303365bf3d2a391fef
 
 	URI: git://git.openembedded.org/meta-openembedded
 	layers: meta-oe, meta-networking, meta-python
-	branch: sumo
+	branch: thud
 
 
 BSP
