@@ -4,8 +4,8 @@ meta-bytesatwork
 
 Introduction
 -------------------------
-This is the official OpenEmbedded/Yocto BSP layer for bytePANEL and byteBOARD
-by bytes at work AG.
+This is the official OpenEmbedded/Yocto BSP layer for bytePANEL by bytes at
+work AG.
 
 It is hosted on https://github.com/bytesatwork/meta-bytesatwork.git
 
@@ -24,9 +24,8 @@ This layer depends on:
 BSP
 -------------------------
 This meta layer provides the Board Support Package (U-Boot and Linux kernel)
-for "bytePANEL" and "byteBOARD" by bytes at work AG. Simply set the variable
-MACHINE to either "bytepanel", "bytepanel-emmc", or "byteboard" to use this
-BSP.
+for "bytePANEL" by bytes at work AG. Simply set the variable MACHINE to either
+"bytepanel", or "bytepanel-emmc" to use this BSP.
 
 Linux Kernel recipe: linux-ti-staging
 
