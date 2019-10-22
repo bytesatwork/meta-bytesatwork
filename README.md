@@ -13,7 +13,7 @@ This layer depends on:
 
 	URI: git://git.openembedded.org/meta-openembedded
 	layers: meta-oe, meta-networking, meta-python
-	branch: warrior
+	branch: zeus
 
 
 Distro/Images
