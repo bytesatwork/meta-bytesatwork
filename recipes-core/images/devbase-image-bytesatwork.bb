@@ -29,6 +29,7 @@ IMAGE_INSTALL += "\
 	gdb \
 	gdbserver \
 	htop \
+	i2c-tools \
 	iproute2 \
 	libsocketcan \
 	man \
