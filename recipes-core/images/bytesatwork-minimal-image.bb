@@ -11,6 +11,10 @@ IMAGE_INSTALL += "\
 	apt \
 	coreutils \
 	dhcp-client \
+	openssh-scp \
+	openssh-sftp-server \
+	openssh-ssh \
+	openssh-sshd \
 	vim \
 "
 
