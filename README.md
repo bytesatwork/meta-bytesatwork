@@ -21,9 +21,8 @@ Distro/Images
 This layer provides the distribution "poky-bytesatwork" and an image to get you
 started quickly:
 
-* devbase-image-bytesatwork: This image contains several essential
-  developer tools, such as editors (vim, nano) and debuggers (gdb,
-  valgrind).
+* bytesatwork-minimal-image: This image contains only essential tools
+  needed to be able to download packages from the package feed.
 
 
 Reporting bugs
