@@ -4,7 +4,7 @@ meta-bytesatwork
 
 Introduction
 -------------------------
-This is the official OpenEmbedded/Yocto distro/images layer for bytePANEL by
+This is the official OpenEmbedded/Yocto distro/images layer for byteDEVKIT by
 bytes at work AG.
 
 It is hosted on https://github.com/bytesatwork/meta-bytesatwork.git
