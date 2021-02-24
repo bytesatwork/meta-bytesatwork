@@ -11,7 +11,7 @@ IMAGE_INSTALL += "\
 	\
 	apt \
 	coreutils \
-	dhcp-client \
+	dhcpcd \
 	kernel-modules \
 	openssh-scp \
 	openssh-sftp-server \
