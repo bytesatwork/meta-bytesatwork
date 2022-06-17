@@ -11,7 +11,7 @@ IMAGE_INSTALL += "\
 	\
 	apt \
 	coreutils \
-	dhcp-client \
+	dhcpcd \
 	ethtool \
 	kernel-modules \
 	openssh-scp \
