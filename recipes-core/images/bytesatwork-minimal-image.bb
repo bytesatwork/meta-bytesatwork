@@ -24,8 +24,8 @@ IMAGE_INSTALL += "\
 IMAGE_LINGUAS = " "
 IMAGE_FEATURES += "package-management"
 
-# Make the rootfs big enough (6GB), so we're able to install additional packages
-IMAGE_ROOTFS_SIZE = "6291456"
+# Make the rootfs big enough (5.5 GB), so we're able to install additional packages
+IMAGE_ROOTFS_SIZE = "5767168"
 
 inherit core-image
 require password.inc
