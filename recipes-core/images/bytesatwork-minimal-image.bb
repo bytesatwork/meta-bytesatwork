@@ -9,9 +9,12 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda
 inherit core-image
 require password.inc
 
+INCOMPATIBLE_LICENSE = "GPL-3.0* LGPL-3.0* AGPL-3.0*"
+
+TOOLCHAIN_TARGET_TASK:remove = "zsh"
+
 IMAGE_INSTALL += "\
 	apt \
-	coreutils \
 	dhcpcd \
 	ethtool \
 	kernel-modules \
@@ -20,6 +23,7 @@ IMAGE_INSTALL += "\
 	openssh-ssh \
 	openssh-sshd \
 	vim \
+	zsh \
 "
 
 IMAGE_LINGUAS = " "
