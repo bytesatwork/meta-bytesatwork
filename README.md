@@ -24,6 +24,10 @@ started quickly:
   needed to be able to download packages from the package feed.
 
 
-## Reporting bugs
+## Support
 
-Send pull requests, patches, comments, or questions to yocto@bytesatwork.ch
+If you have any questions or encounter any issues while using our products or services, please don’t hesitate to reach out to our support team.
+
+Please feel free to contact us at support@bytesatwork.ch for any questions, comments or pull requests.
+
+We are here to help and will get back to you as soon as possible.
