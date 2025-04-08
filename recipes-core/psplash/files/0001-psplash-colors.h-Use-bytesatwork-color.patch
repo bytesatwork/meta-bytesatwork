@@ -1,0 +1,28 @@
+From f224df14636df872d3f9df6e4983338594d40428 Mon Sep 17 00:00:00 2001
+From: Guy Morand <guy.morand@bytesatwork.ch>
+Date: Tue, 8 Apr 2025 13:45:38 +0000
+Subject: [PATCH] psplash-colors.h: Use bytesatwork color
+
+Use bytesatwork color for the progress bar.
+
+Upstream-Status: Inappropriate [manufactor specific]
+---
+ psplash-colors.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/psplash-colors.h b/psplash-colors.h
+index 82a9893..fdbe8b9 100644
+--- a/psplash-colors.h
++++ b/psplash-colors.h
+@@ -18,7 +18,7 @@
+ #define PSPLASH_TEXT_COLOR 0x6d,0x6d,0x70
+ 
+ /* This is the color of the progress bar indicator */
+-#define PSPLASH_BAR_COLOR 0x6d,0x6d,0x70
++#define PSPLASH_BAR_COLOR 0x02,0x9b,0xdd
+ 
+ /* This is the color of the progress bar background */
+ #define PSPLASH_BAR_BACKGROUND_COLOR 0xec,0xec,0xe1
+-- 
+2.39.5
+
