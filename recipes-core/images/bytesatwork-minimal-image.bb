@@ -26,7 +26,7 @@ IMAGE_INSTALL += "\
 "
 
 IMAGE_LINGUAS = " "
-IMAGE_FEATURES += "package-management"
+IMAGE_FEATURES += "package-management splash"
 
 # Make the rootfs big enough (5.5 GB), so we're able to install additional packages
 IMAGE_ROOTFS_SIZE = "5767168"
