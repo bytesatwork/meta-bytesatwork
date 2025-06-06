@@ -34,6 +34,6 @@ We are here to help and will get back to you as soon as possible.
 
 ## Disclaimer
 
-The provided software is intended solely for development purposes in conjunction with the BytesAtWork development kit. 
+The provided software is intended solely for development purposes in conjunction with the bytesatwork development kit. 
 
 It is neither designed nor supported for use in production environments. 
