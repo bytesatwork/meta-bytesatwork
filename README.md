@@ -31,3 +31,9 @@ If you have any questions or encounter any issues while using our products or se
 Please feel free to contact us at support@bytesatwork.ch for any questions, comments or pull requests.
 
 We are here to help and will get back to you as soon as possible.
+
+## Disclaimer
+
+The provided software is intended solely for development purposes in conjunction with the BytesAtWork development kit. 
+
+It is neither designed nor supported for use in production environments. 
