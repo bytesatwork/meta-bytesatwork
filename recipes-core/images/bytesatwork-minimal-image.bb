@@ -38,4 +38,5 @@ inherit extrausers
 PASSWD = "\$5\$GRsVB6NS5m.keouc\$2KVkZBDFykHAgOpZ.2A7laE7T3TjuwXMFgUnmDMZwqB"
 EXTRA_USERS_PARAMS = "\
 	usermod -p '${PASSWD}' root; \
+	passwd-expire root; \
 "
