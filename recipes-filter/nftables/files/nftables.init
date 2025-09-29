@@ -1,0 +1,41 @@
+#!/bin/sh
+
+CONF=/etc/nftables.conf
+PATH=/sbin:/usr/sbin:/bin:/usr/bin
+NAME=nftables
+BIN=/usr/sbin/nft
+
+# Exit if not installed
+[ -x "$BIN" ] || exit 0
+
+if [ ! -r "$CONF" ] ; then
+	echo "E: No such $NAME config file $CONF" >&2
+	exit 1
+fi
+
+do_start()
+{
+	$BIN -f $CONF
+}
+
+do_stop()
+{
+	$BIN flush ruleset
+}
+
+case "$1" in
+  start)
+	echo "Starting $NAME"
+	do_start
+	;;
+  stop)
+	echo "Stopping $NAME"
+	do_stop
+	;;
+  *)
+	echo "Usage: $0 {start|stop}" >&2
+	exit 1
+	;;
+esac
+
+exit 0

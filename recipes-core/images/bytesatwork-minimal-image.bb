@@ -17,6 +17,7 @@ IMAGE_INSTALL += "\
 	dhcpcd \
 	ethtool \
 	kernel-modules \
+	nftables \
 	openssh-scp \
 	openssh-sftp-server \
 	openssh-ssh \
