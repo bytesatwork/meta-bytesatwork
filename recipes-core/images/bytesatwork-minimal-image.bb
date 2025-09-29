@@ -32,4 +32,10 @@ IMAGE_FEATURES += "package-management splash"
 IMAGE_ROOTFS_SIZE = "5767168"
 
 inherit core-image
-require password.inc
+inherit extrausers
+# create the (escaped) password hash, replace mypassword with yours
+# printf "%q" $(mkpasswd -m sha256crypt mypassword)
+PASSWD = "\$5\$GRsVB6NS5m.keouc\$2KVkZBDFykHAgOpZ.2A7laE7T3TjuwXMFgUnmDMZwqB"
+EXTRA_USERS_PARAMS = "\
+	usermod -p '${PASSWD}' root; \
+"
