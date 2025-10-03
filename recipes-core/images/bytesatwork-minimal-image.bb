@@ -14,7 +14,6 @@ IMAGE_INSTALL += "\
 	packagegroup-core-boot \
 	\
 	apt \
-	dhcpcd \
 	ethtool \
 	kernel-modules \
 	nftables \
